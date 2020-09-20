@@ -37,6 +37,9 @@
 
 #include "../gcode/gcode.h"
 #include "../lcd/ultralcd.h"
+#ifdef RTS_AVAILABLE
+  #include "../lcd/dwin/LCD_RTS.h"
+#endif
 
 #include "../Marlin.h" // for stop(), disable_e_steppers, wait_for_user
 
@@ -578,6 +581,17 @@ static float run_z_probe() {
     float probes[TOTAL_PROBING];
   #endif
 
+  #if ENABLED(FIX_MOUNTED_PROBE)
+    if((0 == READ(OPTO_SWITCH_PIN)) && (AutohomeZflag == true))
+    {
+      digitalWrite(COM_PIN, HIGH);
+      delay(200);
+      digitalWrite(COM_PIN, LOW);
+      delay(200);
+      AutohomeZflag = false;
+    }
+  #endif
+
   #if TOTAL_PROBING > 2
     float probes_total = 0;
     for (
@@ -715,6 +729,15 @@ float probe_at_point(const float &rx, const float &ry, const ProbePtRaise raise_
   // Move the probe to the starting XYZ
   do_blocking_move_to(npos);
 
+  #ifdef FIX_MOUNTED_PROBE
+    if(0 == READ(OPTO_SWITCH_PIN))
+    {
+      delay(100);
+      WRITE(COM_PIN, 0);
+      delay(200);
+    }
+  #endif
+
   float measured_z = NAN;
   if (!DEPLOY_PROBE()) {
     measured_z = run_z_probe() + probe_offset.z;
@@ -726,6 +749,10 @@ float probe_at_point(const float &rx, const float &ry, const ProbePtRaise raise_
       if (STOW_PROBE()) measured_z = NAN;
   }
 
+  #ifdef FIX_MOUNTED_PROBE
+    WRITE(COM_PIN, 1);
+  #endif
+
   if (verbose_level > 2) {
     SERIAL_ECHOPAIR_F("Bed X: ", LOGICAL_X_POSITION(rx), 3);
     SERIAL_ECHOPAIR_F(" Y: ", LOGICAL_Y_POSITION(ry), 3);
@@ -735,6 +762,13 @@ float probe_at_point(const float &rx, const float &ry, const ProbePtRaise raise_
   feedrate_mm_s = old_feedrate_mm_s;
 
   if (isnan(measured_z)) {
+    #if ENABLED(RTS_AVAILABLE)
+      waitway = 0;
+      rtscheck.RTS_SndData(ExchangePageBase + 62, ExchangepageAddr);
+      change_page_font = 62;
+      rtscheck.RTS_SndData(Error_203, ABNORMAL_TEXT_VP);
+      errorway = 3;
+    #endif
     STOW_PROBE();
     LCD_MESSAGEPGM(MSG_LCD_PROBING_FAILED);
     SERIAL_ERROR_MSG(MSG_ERR_PROBING_FAILED);

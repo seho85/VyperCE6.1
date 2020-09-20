@@ -28,6 +28,8 @@
 #include "../sd/cardreader.h"
 #include "../inc/MarlinConfig.h"
 
+#if ENABLED(POWER_LOSS_RECOVERY)
+
 #if ENABLED(MIXING_EXTRUDER)
   #include "../feature/mixing.h"
 #endif
@@ -100,6 +102,9 @@ typedef struct {
 
   // Relative axis modes
   uint8_t axis_relative;
+
+  // recovery flag
+  uint8_t recovery_flag;
 
   // SD Filename and position
   char sd_filename[MAXPATHNAMELENGTH];
@@ -194,3 +199,5 @@ class PrintJobRecovery {
 };
 
 extern PrintJobRecovery recovery;
+
+#endif

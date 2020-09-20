@@ -31,6 +31,9 @@
 #include "../sd/cardreader.h"
 #include "temperature.h"
 #include "../lcd/ultralcd.h"
+#ifdef RTS_AVAILABLE
+  #include "../lcd/dwin/LCD_RTS.h"
+#endif
 
 #if ENABLED(ENDSTOP_INTERRUPTS_FEATURE)
   #include HAL_PATH(../HAL, endstop_interrupts.h)
@@ -302,7 +305,18 @@ void Endstops::not_homing() {
   // If the last move failed to trigger an endstop, call kill
   void Endstops::validate_homing_move() {
     if (trigger_state()) hit_on_purpose();
-    else kill(GET_TEXT(MSG_LCD_HOMING_FAILED));
+    else 
+    {
+      #ifdef RTS_AVAILABLE
+        waitway = 0;
+        rtscheck.RTS_SndData(ExchangePageBase + 62, ExchangepageAddr);
+        change_page_font = 62;
+        rtscheck.RTS_SndData(Error_202, ABNORMAL_TEXT_VP);
+        errorway = 2;
+      #else
+        kill(GET_TEXT(MSG_LCD_HOMING_FAILED));
+      #endif
+    }
   }
 #endif
 

@@ -146,6 +146,7 @@ public:
 
   static inline bool isFileOpen() { return isMounted() && file.isOpen(); }
   static inline uint32_t getIndex() { return sdpos; }
+  static inline uint32_t getfilesize() { return filesize; }
   static inline bool eof() { return sdpos >= filesize; }
   static inline void setIndex(const uint32_t index) { sdpos = index; file.seekSet(index); }
   static inline char* getWorkDirName() { workDir.getDosName(filename); return filename; }
@@ -275,9 +276,9 @@ private:
   #define IS_SD_INSERTED() Sd2Card::isInserted()
 #elif PIN_EXISTS(SD_DETECT)
   #if ENABLED(SD_DETECT_INVERTED)
-    #define IS_SD_INSERTED()  READ(SD_DETECT_PIN)
-  #else
     #define IS_SD_INSERTED() !READ(SD_DETECT_PIN)
+  #else
+    #define IS_SD_INSERTED() READ(SD_DETECT_PIN)
   #endif
 #else
   // No card detect line? Assume the card is inserted.

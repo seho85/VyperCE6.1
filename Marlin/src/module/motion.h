@@ -135,7 +135,7 @@ XYZ_DEFS(signed char, home_dir, HOME_DIR);
   extern xyz_pos_t hotend_offset[HOTENDS];
   void reset_hotend_offsets();
 #elif HOTENDS
-  constexpr xyz_pos_t hotend_offset[HOTENDS] = { { 0 } };
+  constexpr xyz_pos_t hotend_offset[HOTENDS] = { { 0 } };   // BLtouch offset  --2019-12-19
 #else
   constexpr xyz_pos_t hotend_offset[1] = { { 0 } };
 #endif

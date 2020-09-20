@@ -28,6 +28,11 @@
 
 #include "../Marlin.h"
 #include "../lcd/ultralcd.h"
+#ifdef DWIN_LCDDISPLAY
+  #include "../lcd/dwin/dwin.h"
+#endif
+#include "../lcd/dwin/i2c_eeprom.h"
+
 #include "../module/planner.h"
 #include "../module/printcounter.h"
 #include "../core/language.h"
@@ -354,6 +359,7 @@ void CardReader::printFilename() {
 }
 
 void CardReader::mount() {
+  delay(200);  // Power on
   flag.mounted = false;
   if (root.isOpen()) root.close();
 
@@ -1044,6 +1050,10 @@ void CardReader::printingHasFinished() {
   else {
     stopSDPrint();
 
+    #ifdef DWIN_LCDDISPLAY
+      HMI_flag.print_finish = 1;
+    #endif
+
     #if ENABLED(POWER_LOSS_RECOVERY)
       removeJobRecoveryFile();
     #endif
@@ -1107,14 +1117,19 @@ void CardReader::printingHasFinished() {
   // the file being printed, so during SD printing the file should
   // be zeroed and written instead of deleted.
   void CardReader::removeJobRecoveryFile() {
-    if (jobRecoverFileExists()) {
+    #ifdef EEPROM_PLR
       recovery.init();
-      removeFile(recovery.filename);
-      #if ENABLED(DEBUG_POWER_LOSS_RECOVERY)
-        SERIAL_ECHOPGM("Power-loss file delete");
-        serialprintPGM(jobRecoverFileExists() ? PSTR(" failed.\n") : PSTR("d.\n"));
-      #endif
-    }
+      BL24CXX_Write(PLR_ADDR, (uint8_t*)&recovery.info, sizeof(recovery.info));
+    #else
+      if (jobRecoverFileExists()) {
+        recovery.init();
+        removeFile(recovery.filename);
+        #if ENABLED(DEBUG_POWER_LOSS_RECOVERY)
+          SERIAL_ECHOPGM("Power-loss file delete");
+          serialprintPGM(jobRecoverFileExists() ? PSTR(" failed.\n") : PSTR("d.\n"));
+        #endif
+      }
+    #endif
   }
 
 #endif // POWER_LOSS_RECOVERY

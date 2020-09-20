@@ -30,6 +30,17 @@
 
 #include "Marlin.h"
 
+#ifdef DWIN_LCDDISPLAY
+  // DWIN file
+  #include "lcd/dwin/dwin.h"
+  #include "lcd/dwin/dwin_lcd.h"
+  #include "lcd/dwin/rotary_encoder.h"
+  #include "lcd/dwin/i2c_eeprom.h"
+#elif ENABLED(RTS_AVAILABLE)
+  #include "lcd/dwin/LCD_RTS.h"
+  #include "lcd/dwin/i2c_eeprom.h"
+#endif
+
 #include "core/utility.h"
 #include "lcd/ultralcd.h"
 #include "module/motion.h"
@@ -442,7 +453,15 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
   if (max_inactive_time && ELAPSED(ms, gcode.previous_move_ms + max_inactive_time)) {
     SERIAL_ERROR_START();
     SERIAL_ECHOLNPAIR(MSG_KILL_INACTIVE_TIME, parser.command_ptr);
-    kill();
+    #ifdef RTS_AVAILABLE
+      waitway = 0;
+      rtscheck.RTS_SndData(ExchangePageBase + 62, ExchangepageAddr);
+      change_page_font = 62;
+      rtscheck.RTS_SndData(Error_201, ABNORMAL_TEXT_VP);
+      errorway = 1;
+    #else
+      kill();
+    #endif
   }
 
   // Prevent steppers timing-out in the middle of M600
@@ -455,7 +474,9 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
   if (stepper_inactive_time) {
     static bool already_shutdown_steppers; // = false
     if (planner.has_blocks_queued())
+    {
       gcode.reset_stepper_timeout();
+    }
     else if (MOVE_AWAY_TEST && !ignore_stepper_queue && ELAPSED(ms, gcode.previous_move_ms + stepper_inactive_time)) {
       if (!already_shutdown_steppers) {
         already_shutdown_steppers = true;  // L6470 SPI will consume 99% of free time without this
@@ -653,7 +674,30 @@ void idle(
     max7219.idle_tasks();
   #endif
 
-  ui.update();
+  #ifdef DWIN_LCDDISPLAY
+    DWIN_Update();
+  #elif ENABLED(RTS_AVAILABLE)
+    RTSUpdate();
+  #else
+    ui.update();
+  #endif
+  #if ENABLED(FIX_MOUNTED_PROBE)
+    if((IS_SD_PRINTING() == true) && home_flag == false) //  printing and no homing
+    {
+      endstops.enable_z_probe(false);
+    }
+  #endif
+
+  #if ENABLED(FIX_MOUNTED_PROBE)
+    if((0 == READ(OPTO_SWITCH_PIN)) && (home_flag == true))
+    {
+      endstops.enable_z_probe(true);
+      delay(100);
+      WRITE(COM_PIN, 0);
+      delay(200);
+      WRITE(COM_PIN, 1);
+    }
+  #endif
 
   #if ENABLED(HOST_KEEPALIVE_FEATURE)
     gcode.host_keepalive();
@@ -932,9 +976,17 @@ void setup() {
     leds.setup();
   #endif
 
-  ui.init();
-  #if HAS_SPI_LCD && ENABLED(SHOW_BOOTSCREEN)
-    ui.show_bootscreen();
+  #ifdef DWIN_LCDDISPLAY
+    delay(800);   // wait stabillze dalay
+		if(DWIN_ShakeHand()) SERIAL_ECHOLN("\r\nDwin shake hand ok.");
+		else SERIAL_ECHOLN("\r\nDwin shake hand error.");
+    DWIN_Frame_SetDir(1);
+    DWIN_UpdateLCD();   // show bootscreen ( first picture )
+  #else
+    ui.init();
+    #if HAS_SPI_LCD && ENABLED(SHOW_BOOTSCREEN)
+      ui.show_bootscreen();
+    #endif
   #endif
 
   #if ENABLED(SDSUPPORT)
@@ -961,7 +1013,7 @@ void setup() {
 
   print_job_timer.init();   // Initial setup of print job timer
 
-  ui.reset_status();        // Print startup message after print statistics are loaded
+  // ui.reset_status();        // Print startup message after print statistics are loaded
 
   endstops.init();          // Init endstops and pullups
 
@@ -1086,10 +1138,6 @@ void setup() {
     est_init();
   #endif
 
-  #if ENABLED(POWER_LOSS_RECOVERY)
-    recovery.check();
-  #endif
-
   #if ENABLED(USE_WATCHDOG)
     watchdog_init();          // Reinit watchdog after HAL_get_reset_source call
   #endif
@@ -1116,6 +1164,41 @@ void setup() {
 
   #if ENABLED(PRUSA_MMU2)
     mmu2.init();
+  #endif
+
+  #if HAS_COLOR_LEDS
+    leds.set_color(LEDColorWhite());
+  #endif
+
+  #ifdef MYI2C_EEPROM
+    BL24CXX_Init();
+    if(BL24CXX_Check()) // no found I2C_EEPROM
+      SERIAL_ECHOLN("I2C_EEPROM Check Failed!");
+    else
+      SERIAL_ECHOLN("I2C_EEPROM Check Successed!");      
+  #endif
+
+  #if ENABLED(POWER_LOSS_RECOVERY)
+    recovery.check();
+  #endif
+
+  #ifdef DWIN_LCDDISPLAY
+
+    // dwin init
+    Encoder_Configuration();
+    HMI_Init();
+    HMI_StartFrame();
+
+  #elif ENABLED(RTS_AVAILABLE)
+
+    rtscheck.RTS_Init();
+    #ifdef FIX_MOUNTED_PROBE
+      OUT_WRITE(COM_PIN, 1);
+      SET_INPUT(CHECK_MATWEIAL);
+      SET_INPUT(OPTO_SWITCH_PIN);
+      OUT_WRITE(LED_CONTROL_PIN, 0);
+		#endif
+
   #endif
 }
 

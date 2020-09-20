@@ -50,6 +50,9 @@ uint32_t PrintJobRecovery::cmd_sdpos, // = 0
 #include "../module/temperature.h"
 #include "../core/serial.h"
 
+#include "../lcd/dwin/LCD_RTS.h"
+#include "../lcd/dwin/i2c_eeprom.h"
+
 #if ENABLED(FWRETRACT)
   #include "fwretract.h"
 #endif
@@ -103,9 +106,14 @@ void PrintJobRecovery::check() {
   if (enabled) {
     if (!card.isMounted()) card.mount();
     if (card.isMounted()) {
-      load();
-      if (!valid()) return purge();
-      queue.inject_P(PSTR("M1000 S"));
+      #ifdef EEPROM_PLR
+        delay(20);
+        BL24CXX_Read(PLR_ADDR, (uint8_t*)&info, sizeof(info));
+      #else
+        load();
+        if (!valid()) return purge();
+        queue.inject_P(PSTR("M1000 S"));
+      #endif
     }
   }
 }
@@ -233,7 +241,13 @@ void PrintJobRecovery::save(const bool force/*=false*/, const bool save_queue/*=
     // Elapsed print job time
     info.print_job_elapsed = print_job_timer.duration();
 
-    write();
+    info.recovery_flag = true;
+
+    #ifdef EEPROM_PLR
+      BL24CXX_Write(PLR_ADDR, (uint8_t*)&info, sizeof(info));
+    #else
+      write();
+    #endif
   }
 }
 
@@ -293,38 +307,6 @@ void PrintJobRecovery::resume() {
     // Make sure leveling is off before any G92 and G28
     gcode.process_subcommands_now_P(PSTR("M420 S0 Z0"));
   #endif
-
-  // Reset E, raise Z, home XY...
-  gcode.process_subcommands_now_P(PSTR("G92.9 E0"
-    #if Z_HOME_DIR > 0
-
-      // If Z homing goes to max, just reset E and home all
-      "\n"
-      "G28R0"
-      #if ENABLED(MARLIN_DEV_MODE)
-        "S"
-      #endif
-
-    #else // "G92.9 E0 ..."
-
-      // Set Z to 0, raise Z by RECOVERY_ZRAISE, and Home (XY only for Cartesian)
-      // with no raise. (Only do simulated homing in Marlin Dev Mode.)
-      #if ENABLED(BACKUP_POWER_SUPPLY)
-        "Z" STRINGIFY(POWER_LOSS_ZRAISE)    // Z-axis was already raised at outage
-      #else
-        "Z0\n"                              // Set Z=0
-        "G1Z" STRINGIFY(POWER_LOSS_ZRAISE)  // Raise Z
-      #endif
-      "\n"
-
-      "G28R0"
-      #if ENABLED(MARLIN_DEV_MODE)
-        "S"
-      #elif !IS_KINEMATIC
-        "XY"
-      #endif
-    #endif
-  ));
 
   // Pretend that all axes are homed
   axis_homed = axis_known_position = xyz_bits;
@@ -391,6 +373,41 @@ void PrintJobRecovery::resume() {
     }
   }
 
+  gcode.process_subcommands_now_P(PSTR("G92.9 E0 Z0"));
+  gcode.process_subcommands_now_P(PSTR("G28 XY"));
+
+  // Reset E, raise Z, home XY...
+  // gcode.process_subcommands_now_P(PSTR("G92.9 E0"
+  //   #if Z_HOME_DIR > 0
+
+  //     // If Z homing goes to max, just reset E and home all
+  //     "\n"
+  //     "G28R0"
+  //     #if ENABLED(MARLIN_DEV_MODE)
+  //       "S"
+  //     #endif
+
+  //   #else // "G92.9 E0 ..."
+
+  //     // Set Z to 0, raise Z by RECOVERY_ZRAISE, and Home (XY only for Cartesian)
+  //     // with no raise. (Only do simulated homing in Marlin Dev Mode.)
+  //     #if ENABLED(BACKUP_POWER_SUPPLY)
+  //       "Z" STRINGIFY(POWER_LOSS_ZRAISE)    // Z-axis was already raised at outage
+  //     #else
+  //       "Z0\n"                              // Set Z=0
+  //       "G1Z" STRINGIFY(POWER_LOSS_ZRAISE)  // Raise Z
+  //     #endif
+  //     "\n"
+
+  //     "G28R0"
+  //     #if ENABLED(MARLIN_DEV_MODE)
+  //       "S"
+  //     #elif !IS_KINEMATIC
+  //       "XY"
+  //     #endif
+  //   #endif
+  // ));
+
   // Restore retract and hop state
   #if ENABLED(FWRETRACT)
     for (uint8_t e = 0; e < EXTRUDERS; e++) {
@@ -443,6 +460,7 @@ void PrintJobRecovery::resume() {
     sprintf_P(cmd, PSTR("G92.9 Z%s"), str_1);
   #endif
   gcode.process_subcommands_now(cmd);
+
 
   // Un-retract
   #if POWER_LOSS_PURGE_LEN

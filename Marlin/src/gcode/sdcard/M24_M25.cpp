@@ -27,6 +27,7 @@
 #include "../gcode.h"
 #include "../../sd/cardreader.h"
 #include "../../module/printcounter.h"
+#include "../../gcode/queue.h"
 #include "../../lcd/ultralcd.h"
 
 #if ENABLED(PARK_HEAD_ON_PAUSE)
@@ -98,7 +99,6 @@ void GcodeSuite::M25() {
   #else
 
     print_job_timer.pause();
-    ui.reset_status();
 
     #if ENABLED(HOST_ACTION_COMMANDS)
       #if ENABLED(HOST_PROMPT_SUPPORT)
@@ -110,6 +110,7 @@ void GcodeSuite::M25() {
     #endif
 
   #endif
+
 }
 
 #endif // SDSUPPORT

@@ -26,6 +26,9 @@
 
 #include "../../module/stepper.h"
 #include "../../module/endstops.h"
+#include "../../module/printcounter.h"
+#include "../../sd/cardreader.h"
+#include "../../feature/power_loss_recovery.h"
 
 #if HOTENDS > 1
   #include "../../module/tool_change.h"
@@ -46,6 +49,11 @@
 #endif
 
 #include "../../lcd/ultralcd.h"
+#ifdef DWIN_LCDDISPLAY
+  #include "../../lcd/dwin/dwin.h"
+#elif ENABLED(RTS_AVAILABLE)
+  #include "../../lcd/dwin/LCD_RTS.h"
+#endif
 
 #if HAS_DRIVER(L6470)                         // set L6470 absolute position registers to counts
   #include "../../libs/L6470/L6470_Marlin.h"
@@ -214,6 +222,24 @@ void GcodeSuite::G28(const bool always_home_all) {
     log_machine_info();
   }
 
+  home_flag = true;
+
+  if(waitway == 4 || waitway == 6 || waitway == 7)
+  {
+    if(language_change_font != 0)
+    {
+      // exchange to 60 page
+      rtscheck.RTS_SndData(ExchangePageBase + 60, ExchangepageAddr);
+      change_page_font = 60;
+    }
+    else
+    {
+      // exchange to 61 page
+      rtscheck.RTS_SndData(ExchangePageBase + 61, ExchangepageAddr);
+      change_page_font = 61;
+    }
+  }
+
   #if ENABLED(DUAL_X_CARRIAGE)
     bool IDEX_saved_duplication_state = extruder_duplication_enabled;
     DualXMode IDEX_saved_mode = dual_x_carriage_mode;
@@ -338,15 +364,17 @@ void GcodeSuite::G28(const bool always_home_all) {
       #if ENABLED(UNKNOWN_Z_NO_RAISE)
         !TEST(axis_known_position, Z_AXIS) ? 0 :
       #endif
-          (parser.seenval('R') ? parser.value_linear_units() : Z_HOMING_HEIGHT)
+        (parser.seenval('R') ? parser.value_linear_units() : Z_HOMING_HEIGHT)
     );
 
-    if (z_homing_height && (doX || doY)) {
-      // Raise Z before homing any other axes and z is not already high enough (never lower z)
-      destination.z = z_homing_height + (TEST(axis_known_position, Z_AXIS) ? 0.0f : current_position.z);
-      if (destination.z > current_position.z) {
-        if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("Raise Z (before homing) to ", destination.z);
-        do_blocking_move_to_z(destination.z);
+    if(finish_home == false && waitway != 7)
+    {
+      if (z_homing_height && (doX || doY)) {
+        destination.z = z_homing_height + (TEST(axis_known_position, Z_AXIS) ? 0.0f : current_position.z);
+        if (destination.z > current_position.z) {
+          if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("Raise Z (before homing) to ", destination.z);
+          do_blocking_move_to_z(destination.z);
+        }
       }
     }
 
@@ -522,6 +550,84 @@ void GcodeSuite::G28(const bool always_home_all) {
 
   ui.refresh();
 
+  #ifdef RTS_AVAILABLE
+    if(change_page_font != 62)
+    {
+      if(waitway == 6)
+      {
+        if(language_change_font != 0)
+        {
+          do_blocking_move_to_z(0);
+          rtscheck.RTS_SndData(ExchangePageBase + 25, ExchangepageAddr);
+          change_page_font = 25;
+        }
+        else
+        {
+          do_blocking_move_to_z(0);
+          rtscheck.RTS_SndData(ExchangePageBase + 52, ExchangepageAddr);
+          change_page_font = 52;
+        }
+        waitway = 0;
+      }
+      else if(waitway == 4)
+      {
+        if(language_change_font != 0)
+        {
+          do_blocking_move_to_z(0);
+          rtscheck.RTS_SndData(ExchangePageBase + 15 + AxisUnitMode, ExchangepageAddr);
+          change_page_font = 15;
+        }
+        else
+        {
+          do_blocking_move_to_z(0);
+          rtscheck.RTS_SndData(ExchangePageBase + 42 + AxisUnitMode, ExchangepageAddr);
+          change_page_font = 42;
+        }
+        waitway = 0;
+      }
+      else if(waitway == 7)
+      {
+        if(language_change_font != 0)
+        {
+          // exchange to 1 page
+          rtscheck.RTS_SndData(ExchangePageBase + 1, ExchangepageAddr);
+          change_page_font = 1;
+        }
+        else
+        {
+          // exchange to 24 page
+          rtscheck.RTS_SndData(ExchangePageBase + 28, ExchangepageAddr);
+          change_page_font = 28;
+        }
+        rtscheck.RTS_SndData(2, MOTOR_FREE_ICON_VP); 
+        rtscheck.RTS_SndData(0, PRINT_PROCESS_TITLE_VP);
+        rtscheck.RTS_SndData(0, PRINT_PROCESS_VP);
+        delay(2);
+        for(int j = 0;j < 10;j ++)
+        {
+          // clean screen.
+          rtscheck.RTS_SndData(0, CONTINUE_PRINT_FILE_TEXT_VP + j);
+        }
+        waitway = 0;
+      }
+      rtscheck.RTS_SndData(10*current_position[X_AXIS], AXIS_X_COORD_VP);
+      rtscheck.RTS_SndData(10*current_position[Y_AXIS], AXIS_Y_COORD_VP);
+      rtscheck.RTS_SndData(10*current_position[Z_AXIS], AXIS_Z_COORD_VP);
+
+      if(finish_home) finish_home = false;
+
+      if(StartPrint_flag) 
+      {
+        StartPrint_flag = 0;
+        recovery.info.current_position.z = 0;
+      }
+      errorway = errornum = 0;
+    }
+  #endif
+
+  home_flag = false;
+  endstops.enable_z_probe(false);
+
   report_current_position();
 
   #if ENABLED(NANODLP_Z_SYNC)
@@ -543,4 +649,5 @@ void GcodeSuite::G28(const bool always_home_all) {
       L6470.set_param(cv, L6470_ABS_POS, stepper.position((AxisEnum)L6470.axis_xref[cv]));
     }
   #endif
+
 }
