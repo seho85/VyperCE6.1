@@ -50,7 +50,13 @@
 #include "planner.h"
 #include "stepper.h"
 #include "temperature.h"
-#include "../lcd/ultralcd.h"
+#ifdef DWIN_LCDDISPLAY
+  #include "../lcd/dwin/dwin.h"
+#elif ENABLED(RTS_AVAILABLE)
+  #include "../lcd/dwin/LCD_RTS.h"
+#else
+  #include "../lcd/ultralcd.h"
+#endif
 #include "../core/language.h"
 #include "../libs/vector_3.h"   // for matrix_3x3
 #include "../gcode/gcode.h"
@@ -770,6 +776,10 @@ void MarlinSettings::postprocess() {
         const int16_t (&ui_preheat_hotend_temp)[2]  = ui.preheat_hotend_temp,
                       (&ui_preheat_bed_temp)[2]     = ui.preheat_bed_temp;
         const uint8_t (&ui_preheat_fan_speed)[2]    = ui.preheat_fan_speed;
+      #elif ENABLED(DWIN_LCDDISPLAY) || ENABLED(RTS_AVAILABLE)
+        const int16_t (&ui_preheat_hotend_temp)[2]  = HMI_ValueStruct.preheat_hotend_temp,
+                      (&ui_preheat_bed_temp)[2]     = HMI_ValueStruct.preheat_bed_temp;
+        const uint8_t (&ui_preheat_fan_speed)[2]    = HMI_ValueStruct.preheat_fan_speed;
       #else
         constexpr int16_t ui_preheat_hotend_temp[2] = { PREHEAT_1_TEMP_HOTEND, PREHEAT_2_TEMP_HOTEND },
                           ui_preheat_bed_temp[2]    = { PREHEAT_1_TEMP_BED, PREHEAT_2_TEMP_BED };
@@ -1575,7 +1585,11 @@ void MarlinSettings::postprocess() {
           int16_t (&ui_preheat_hotend_temp)[2]  = ui.preheat_hotend_temp,
                   (&ui_preheat_bed_temp)[2]     = ui.preheat_bed_temp;
           uint8_t (&ui_preheat_fan_speed)[2]    = ui.preheat_fan_speed;
-        #else
+       #elif ENABLED(DWIN_LCDDISPLAY) || ENABLED(RTS_AVAILABLE)
+          int16_t (&ui_preheat_hotend_temp)[2]  = HMI_ValueStruct.preheat_hotend_temp,
+                  (&ui_preheat_bed_temp)[2]     = HMI_ValueStruct.preheat_bed_temp;
+          uint8_t (&ui_preheat_fan_speed)[2]    = HMI_ValueStruct.preheat_fan_speed;
+       #else
           int16_t ui_preheat_hotend_temp[2], ui_preheat_bed_temp[2];
           uint8_t ui_preheat_fan_speed[2];
         #endif
@@ -2430,8 +2444,14 @@ void MarlinSettings::reset() {
   //
   // Preheat parameters
   //
-
-  #if HOTENDS && HAS_LCD_MENU
+  #if ENABLED(DWIN_LCDDISPLAY) || ENABLED(RTS_AVAILABLE)
+    HMI_ValueStruct.preheat_hotend_temp[0] = PREHEAT_1_TEMP_HOTEND;
+    HMI_ValueStruct.preheat_hotend_temp[1] = PREHEAT_2_TEMP_HOTEND;
+    HMI_ValueStruct.preheat_bed_temp[0] = PREHEAT_1_TEMP_BED;
+    HMI_ValueStruct.preheat_bed_temp[1] = PREHEAT_2_TEMP_BED;
+    HMI_ValueStruct.preheat_fan_speed[0] = PREHEAT_1_FAN_SPEED;
+    HMI_ValueStruct.preheat_fan_speed[1] = PREHEAT_2_FAN_SPEED;
+  #elif HOTENDS && HAS_LCD_MENU
     ui.preheat_hotend_temp[0] = PREHEAT_1_TEMP_HOTEND;
     ui.preheat_hotend_temp[1] = PREHEAT_2_TEMP_HOTEND;
     ui.preheat_bed_temp[0] = PREHEAT_1_TEMP_BED;

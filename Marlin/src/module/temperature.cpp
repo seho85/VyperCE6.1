@@ -29,6 +29,11 @@
 
 #include "../Marlin.h"
 #include "../lcd/ultralcd.h"
+#ifdef DWIN_LCDDISPLAY
+  #include "../lcd/dwin/dwin.h"
+#elif ENABLED(RTS_AVAILABLE)
+  #include "../lcd/dwin/LCD_RTS.h"
+#endif
 #include "planner.h"
 #include "../core/language.h"
 #include "../HAL/shared/Delay.h"
@@ -541,10 +546,20 @@ volatile bool Temperature::temp_meas_ready = false;
                 if (current_temp > watch_temp_target) heated = true;     // - Flag if target temperature reached
               }
               else if (ELAPSED(ms, temp_change_ms))                 // Watch timer expired
+              {
+                #ifdef DWIN_LCDDISPLAY
+                  Popup_Window_Temperation(2);
+                #endif
                 _temp_error(heater, PSTR(MSG_T_HEATING_FAILED), GET_TEXT(MSG_HEATING_FAILED_LCD));
+              }
             }
             else if (current_temp < target - (MAX_OVERSHOOT_PID_AUTOTUNE)) // Heated, then temperature fell too far?
+            {
+              #ifdef DWIN_LCDDISPLAY
+                Popup_Window_Temperation(2);
+              #endif
               _temp_error(heater, PSTR(MSG_T_THERMAL_RUNAWAY), GET_TEXT(MSG_THERMAL_RUNAWAY));
+            }
           }
         #endif
       } // every 2 seconds
@@ -554,6 +569,10 @@ volatile bool Temperature::temp_meas_ready = false;
         #define MAX_CYCLE_TIME_PID_AUTOTUNE 20L
       #endif
       if (((ms - t1) + (ms - t2)) > (MAX_CYCLE_TIME_PID_AUTOTUNE * 60L * 1000L)) {
+        #ifdef RTS_AVAILABLE
+          rtscheck.RTS_SndData(ExchangePageBase + 58, ExchangepageAddr);
+          change_page_font = 58;
+        #endif
         SERIAL_ECHOLNPGM(MSG_PID_TIMEOUT);
         break;
       }
@@ -605,7 +624,13 @@ volatile bool Temperature::temp_meas_ready = false;
 
         goto EXIT_M303;
       }
-      ui.update();
+      #ifdef DWIN_LCDDISPLAY
+        DWIN_Update();
+      #elif ENABLED(RTS_AVAILABLE)
+        RTSUpdate();
+      #else
+        ui.update();
+      #endif
     }
 
     disable_all_heaters();
@@ -801,10 +826,22 @@ void Temperature::_temp_error(const heater_ind_t heater, PGM_P const serial_msg,
 }
 
 void Temperature::max_temp_error(const heater_ind_t heater) {
+  #ifdef DWIN_LCDDISPLAY
+    Popup_Window_Temperation(1);
+  #elif ENABLED(RTS_AVAILABLE)
+    rtscheck.RTS_SndData(ExchangePageBase + 59, ExchangepageAddr);
+    change_page_font = 59;
+  #endif
   _temp_error(heater, PSTR(MSG_T_MAXTEMP), GET_TEXT(MSG_ERR_MAXTEMP));
 }
 
 void Temperature::min_temp_error(const heater_ind_t heater) {
+  #ifdef DWIN_LCDDISPLAY
+    Popup_Window_Temperation(0);
+  #elif ENABLED(RTS_AVAILABLE)
+    rtscheck.RTS_SndData(ExchangePageBase + 59, ExchangepageAddr);
+    change_page_font = 59;
+  #endif
   _temp_error(heater, PSTR(MSG_T_MINTEMP), GET_TEXT(MSG_ERR_MINTEMP));
 }
 
@@ -1040,7 +1077,12 @@ void Temperature::manage_heater() {
     HOTEND_LOOP() {
       #if ENABLED(THERMAL_PROTECTION_HOTENDS)
         if (degHotend(e) > temp_range[e].maxtemp)
+        {
+          #ifdef DWIN_LCDDISPLAY
+            Popup_Window_Temperation(1);
+          #endif
           _temp_error((heater_ind_t)e, PSTR(MSG_T_THERMAL_RUNAWAY), GET_TEXT(MSG_THERMAL_RUNAWAY));
+        }
       #endif
 
       #if HEATER_IDLE_HANDLER
@@ -1058,7 +1100,15 @@ void Temperature::manage_heater() {
         // Make sure temperature is increasing
         if (watch_hotend[e].next_ms && ELAPSED(ms, watch_hotend[e].next_ms)) { // Time to check this extruder?
           if (degHotend(e) < watch_hotend[e].target)                             // Failed to increase enough?
+          {
+            #ifdef DWIN_LCDDISPLAY
+              Popup_Window_Temperation(0);
+            #elif ENABLED(RTS_AVAILABLE)
+              rtscheck.RTS_SndData(ExchangePageBase + 58, ExchangepageAddr);
+              change_page_font = 58;
+            #endif
             _temp_error((heater_ind_t)e, PSTR(MSG_T_HEATING_FAILED), GET_TEXT(MSG_HEATING_FAILED_LCD));
+          }
           else                                                                 // Start again if the target is still far off
             start_watching_hotend(e);
         }
@@ -1093,14 +1143,27 @@ void Temperature::manage_heater() {
 
     #if ENABLED(THERMAL_PROTECTION_BED)
       if (degBed() > BED_MAXTEMP)
+      {
+        #ifdef DWIN_LCDDISPLAY
+          Popup_Window_Temperation(1);
+        #endif
         _temp_error(H_BED, PSTR(MSG_T_THERMAL_RUNAWAY), GET_TEXT(MSG_THERMAL_RUNAWAY));
+      }
     #endif
 
     #if WATCH_BED
       // Make sure temperature is increasing
       if (watch_bed.elapsed(ms)) {        // Time to check the bed?
         if (degBed() < watch_bed.target)                                // Failed to increase enough?
+        {
+          #ifdef DWIN_LCDDISPLAY
+            Popup_Window_Temperation(0);
+          #elif ENABLED(RTS_AVAILABLE)
+            rtscheck.RTS_SndData(ExchangePageBase + 58, ExchangepageAddr);
+            change_page_font = 58;
+          #endif
           _temp_error(H_BED, PSTR(MSG_T_HEATING_FAILED), GET_TEXT(MSG_HEATING_FAILED_LCD));
+        }
         else                                                            // Start again if the target is still far off
           start_watching_bed();
       }
@@ -1959,6 +2022,12 @@ void Temperature::init() {
         sm.state = TRRunaway;
 
       case TRRunaway:
+        #ifdef DWIN_LCDDISPLAY
+          Popup_Window_Temperation(2);
+        #elif ENABLED(RTS_AVAILABLE)
+          rtscheck.RTS_SndData(ExchangePageBase + 57, ExchangepageAddr);
+          change_page_font = 57;
+        #endif
         _temp_error(heater_id, PSTR(MSG_T_THERMAL_RUNAWAY), GET_TEXT(MSG_THERMAL_RUNAWAY));
     }
   }
@@ -2337,6 +2406,8 @@ HAL_TEMP_TIMER_ISR() {
   HAL_timer_isr_prologue(TEMP_TIMER_NUM);
 
   Temperature::tick();
+
+  HAL_watchdog_refresh();
 
   HAL_timer_isr_epilogue(TEMP_TIMER_NUM);
 }
@@ -2986,7 +3057,27 @@ void Temperature::tick() {
       } while (wait_for_heatup && TEMP_CONDITIONS);
 
       if (wait_for_heatup) {
-        ui.reset_status();
+        if(heat_flag && printingIsActive())
+        {
+          if(language_change_font != 0)
+          {
+            rtscheck.RTS_SndData(ExchangePageBase + 10, ExchangepageAddr);
+            change_page_font = 10;
+          }
+          else
+          {
+            rtscheck.RTS_SndData(ExchangePageBase + 37, ExchangepageAddr);
+            change_page_font = 37;
+          }
+        }
+        heat_flag = 0;
+        #ifdef DWIN_LCDDISPLAY
+          HMI_flag.heat_flag = 0;
+          duration_t elapsed = print_job_timer.duration();	// print timer
+          heat_time = elapsed.value;
+        #else
+          ui.reset_status();
+        #endif
         #if ENABLED(PRINTER_EVENT_LEDS)
           printerEventLEDs.onHeatingDone();
         #endif

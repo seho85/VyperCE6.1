@@ -24,6 +24,7 @@
 #include "../../module/configuration_store.h"
 #include "../../core/serial.h"
 #include "../../inc/MarlinConfig.h"
+#include "../../lcd/dwin/LCD_RTS.h"
 
 /**
  * M500: Store settings in EEPROM

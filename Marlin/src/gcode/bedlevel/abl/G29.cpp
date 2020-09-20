@@ -34,10 +34,16 @@
 #include "../../../module/planner.h"
 #include "../../../module/stepper.h"
 #include "../../../module/probe.h"
+#include "../../../module/configuration_store.h"
+#include "../../../module/temperature.h"
 #include "../../queue.h"
 
-#if HAS_DISPLAY
-  #include "../../../lcd/ultralcd.h"
+#include "../../../lcd/ultralcd.h"
+#ifdef DWIN_LCDDISPLAY
+  #include "../../../lcd/dwin/dwin.h"
+#endif
+#ifdef RTS_AVAILABLE
+  #include "../../../lcd/dwin/LCD_RTS.h"
 #endif
 
 #if ENABLED(AUTO_BED_LEVELING_LINEAR)
@@ -453,6 +459,8 @@ G29_TYPE GcodeSuite::G29() {
       }
     #endif
 
+    do_blocking_move_to_z(_MAX(Z_CLEARANCE_BETWEEN_PROBES, Z_CLEARANCE_DEPLOY_PROBE));
+
     if (!faux) remember_feedrate_scaling_off();
 
     #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
@@ -659,7 +667,10 @@ G29_TYPE GcodeSuite::G29() {
 
     #if ABL_GRID
 
-      bool zig = PR_OUTER_END & 1;  // Always end at RIGHT and BACK_PROBE_BED_POSITION
+      // bool zig = PR_OUTER_END & 1;  // Always end at RIGHT and BACK_PROBE_BED_POSITION
+      bool zig = 1;
+
+      uint8_t showcount = 0;
 
       measured_z = 0;
 
@@ -729,6 +740,30 @@ G29_TYPE GcodeSuite::G29() {
             z_values[meshCount.x][meshCount.y] = measured_z + zoffset;
             #if ENABLED(EXTENSIBLE_UI)
               ExtUI::onMeshUpdate(meshCount, z_values[meshCount.x][meshCount.y]);
+            #endif
+
+            #ifdef RTS_AVAILABLE
+              if((showcount++) < GRID_MAX_POINTS)
+              {
+                rtscheck.RTS_SndData(showcount, AUTO_BED_LEVEL_TITLE_VP);
+                if(language_change_font != 0)
+                {
+                  rtscheck.RTS_SndData(ExchangePageBase + 26, ExchangepageAddr);
+                  change_page_font = 26;
+                }
+                else
+                {
+                  rtscheck.RTS_SndData(ExchangePageBase + 53, ExchangepageAddr);
+                  change_page_font = 53;
+                }
+                rtscheck.RTS_SndData(AUTO_BED_LEVEL_PREHEAT, AUTO_BED_PREHEAT_HEAD_DATA_VP);
+                rtscheck.RTS_SndData(AUTO_BED_LEVEL_PREHEAT, HEAD_SET_TEMP_VP);
+                rtscheck.RTS_SndData(probe_offset.z * 100, AUTO_BED_LEVEL_ZOFFSET_VP);
+
+                rtscheck.RTS_SndData(feedrate_percentage, PRINT_SPEED_RATE_VP);
+                rtscheck.RTS_SndData(thermalManager.temp_hotend[0].target, HEAD_SET_TEMP_VP);
+                rtscheck.RTS_SndData(thermalManager.temp_bed.target, BED_SET_TEMP_VP);
+              }
             #endif
 
           #endif
@@ -808,6 +843,14 @@ G29_TYPE GcodeSuite::G29() {
       if (!dryrun) extrapolate_unprobed_bed_level();
       print_bilinear_leveling_grid();
 
+      #ifdef RTS_AVAILABLE
+        if(3 == waitway)
+        {
+          waitway = 0;
+        }
+      #endif
+
+      settings.save();
       refresh_bed_level();
 
       #if ENABLED(ABL_BILINEAR_SUBDIVISION)
@@ -960,7 +1003,15 @@ G29_TYPE GcodeSuite::G29() {
     process_subcommands_now_P(PSTR(Z_PROBE_END_SCRIPT));
   #endif
 
+  #ifdef DWIN_LCDDISPLAY
+
+    if(checkkey == Leveing) Goto_ProcessFrame();
+    
+  #endif
+
   report_current_position();
+
+  do_blocking_move_to_xy(safe_homing_xy);
 
   G29_RETURN(isnan(measured_z));
 }

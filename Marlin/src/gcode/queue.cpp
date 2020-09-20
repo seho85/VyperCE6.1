@@ -29,6 +29,9 @@ GCodeQueue queue;
 
 #include "gcode.h"
 
+#ifdef RTS_AVAILABLE
+  #include "../lcd/dwin/LCD_RTS.h"
+#endif
 #include "../lcd/ultralcd.h"
 #include "../sd/cardreader.h"
 #include "../module/planner.h"
@@ -528,6 +531,8 @@ void GCodeQueue::get_serial_commands() {
 
           card.printingHasFinished();
 
+          print_finish = 1;
+
           if (IS_SD_PRINTING())
             sd_count = 0; // If a sub-file was printing, continue from call point
           else {
@@ -545,6 +550,22 @@ void GCodeQueue::get_serial_commands() {
               #endif
             #endif // PRINTER_EVENT_LEDS
           }
+
+          #ifdef RTS_AVAILABLE
+            rtscheck.RTS_SndData(100, PRINT_PROCESS_VP);
+            delay(1);
+            rtscheck.RTS_SndData(100 ,PRINT_PROCESS_TITLE_VP);
+            if(language_change_font != 0)
+            {
+              rtscheck.RTS_SndData(ExchangePageBase + 9, ExchangepageAddr);
+              change_page_font = 9;
+            }
+            else
+            {
+              rtscheck.RTS_SndData(ExchangePageBase + 36, ExchangepageAddr);
+              change_page_font = 36;
+            }
+          #endif          
         }
         else if (n == -1)
           SERIAL_ERROR_MSG(MSG_SD_ERR_READ);

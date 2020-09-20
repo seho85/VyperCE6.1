@@ -38,6 +38,7 @@
   #include "../libs/buzzer.h"
   #include "../lcd/ultralcd.h"
 #endif
+#include "../lcd/dwin/LCD_RTS.h"
 
 #if HAS_BED_PROBE
   #include "probe.h"
@@ -1249,6 +1250,13 @@ void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t 
     DEBUG_ECHOLNPGM(")");
   }
 
+  #if ENABLED(FIX_MOUNTED_PROBE)
+    if((axis == Z_AXIS) && (1 == READ(OPTO_SWITCH_PIN)))
+    {
+      set_probe_deployed(false);
+    }
+  #endif
+
   #if HOMING_Z_WITH_PROBE && HAS_HEATED_BED && ENABLED(WAIT_FOR_BED_HEATER)
     // Wait for bed to heat back up between probing points
     if (axis == Z_AXIS && distance < 0 && thermalManager.isHeatingBed()) {
@@ -1493,6 +1501,13 @@ void homeaxis(const AxisEnum axis) {
       #endif
       stepper.set_separate_multi_axis(true);
       default: break;
+    }
+  #endif
+
+  #if ENABLED(FIX_MOUNTED_PROBE)
+    if(axis == Z_AXIS)
+    {
+      AutohomeZflag = true;
     }
   #endif
 

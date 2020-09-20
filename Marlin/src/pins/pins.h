@@ -487,6 +487,8 @@
   #include "stm32/pins_FYSETC_CHEETAH_V12.h"    // STM32F1                                env:STM32F103RC_fysetc
 #elif MB(LONGER3D_LK)
   #include "stm32/pins_LONGER3D_LK.h"           // STM32F1                                env:STM32F103VE_longer
+#elif MB(CREALITY)
+  #include "stm32/pins_CREALITY.h"              // STM32F1                                env:creality
 
 //
 // ARM Cortex-M4F
