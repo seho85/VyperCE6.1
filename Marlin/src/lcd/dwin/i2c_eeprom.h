@@ -6,6 +6,7 @@
 
 #include <libmaple/gpio.h>
 
+#ifdef MYI2C_EEPROM
 
 /******************** IIC ********************/
 //IO方向设置
@@ -40,10 +41,10 @@ uint8_t IIC_Read_One_Byte(uint8_t daddr,uint8_t addr);
 #define BL24C08		1023
 #define BL24C16		2047
 #define BL24C32		4095
-#define BL24C64	  8191
+#define BL24C64	    8191
 #define BL24C128	16383
 #define BL24C256	32767  
-#define EE_TYPE   BL24C16
+#define EE_TYPE   BL24C32
 					  
 uint8_t BL24CXX_ReadOneByte(uint16_t ReadAddr);							          //指定地址读取一个字节
 void BL24CXX_WriteOneByte(uint16_t WriteAddr,uint8_t DataToWrite);		//指定地址写入一个字节
@@ -55,6 +56,7 @@ void BL24CXX_Read(uint16_t ReadAddr,uint8_t *pBuffer,uint16_t NumToRead);   	//�
 uint8_t BL24CXX_Check(void);  //检查器件
 void BL24CXX_Init(void); //初始化IIC
 
+#endif
 
 #endif
 

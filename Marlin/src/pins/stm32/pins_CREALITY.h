@@ -40,9 +40,9 @@
 /* I2C */
 // #define I2C_EEPROM
 // #define E2END 0x3FFF   // 16Kb (24c16)
-#define MYI2C_EEPROM      // EEPROM on I2C-0
-#define IIC_EEPROM_SDA       PA11
-#define IIC_EEPROM_SCL       PA12
+//#define MYI2C_EEPROM      // EEPROM on I2C-0
+#define IIC_EEPROM_SDA       PB7
+#define IIC_EEPROM_SCL       PB6
 
 /* SPI */
 //#define SPI_EEPROM  // EEPROM on SPI-0
@@ -63,37 +63,52 @@
 //
 // Limit Switches
 //
-#define X_MIN_PIN          PC4
+#define X_MIN_PIN          PC0
 // #define X_MAX_PIN          PA7
-#define Y_MIN_PIN          PC5
+#define Y_MIN_PIN          PC1
 #ifdef BLTOUCH
   #define Z_MIN_PIN        PB1  // BLTouch IN PIN
   #define SERVO0_PIN       PB0  // BLTouch OUT PIN
 #elif ENABLED(FIX_MOUNTED_PROBE)
-  #define Z_MIN_PIN        PA4
-  #define COM_PIN          PA5
+  #define Z_MIN_PIN        PC14
+  #define COM_PIN          PA1
 #else
   #define Z_MIN_PIN        PA7
 #endif
 
+#define CONTROLLER_FAN_PIN  PC7
+// #define FLASH_EEPROM_EMULATION
+// #define EEPROM_PAGE_SIZE     uint16(0x800) // 2KB
+// #define EEPROM_START_ADDRESS uint32(0x8000000 + (STM32_FLASH_SIZE) * 1024 - 2 * EEPROM_PAGE_SIZE)
+// #undef E2END
+// #define E2END                (EEPROM_PAGE_SIZE - 1) // 2KB
+
+// Onboard I2C EEPROM
+//#if NO_EEPROM_SELECTED
+  #define I2C_EEPROM
+  #define MARLIN_EEPROM_SIZE 0x1000                 // 4KB
+  #define E2END                (MARLIN_EEPROM_SIZE - 1) // 2KB
+//  #undef NO_EEPROM_SELECTED
+//#endif
 //
 // Steppers
 //
-#define X_ENABLE_PIN        PC3
-#define X_STEP_PIN          PB8
-#define X_DIR_PIN           PB7
+#define X_ENABLE_PIN        PB14
+#define X_STEP_PIN          PB13
+#define X_DIR_PIN           PB12
 
-#define Y_ENABLE_PIN        PC3
-#define Y_STEP_PIN          PB6
-#define Y_DIR_PIN           PB5
+#define Y_ENABLE_PIN        PB11
+#define Y_STEP_PIN          PB10
+#define Y_DIR_PIN           PB2
 
-#define Z_ENABLE_PIN        PC3
-#define Z_STEP_PIN          PB4
-#define Z_DIR_PIN           PB3
+//#define Z_ENABLE_PIN        PA0
+#define Z_ENABLE_PIN        PB1
+#define Z_STEP_PIN          PB0
+#define Z_DIR_PIN           PC5
 
-#define E0_ENABLE_PIN       PC3
-#define E0_STEP_PIN         PC2
-#define E0_DIR_PIN          PB9
+#define E0_ENABLE_PIN       PD2
+#define E0_STEP_PIN         PB3
+#define E0_DIR_PIN          PB4
 
 #if HAS_TMC220x
 
@@ -102,10 +117,10 @@
   //
   // #define TMC2208_STANDALONE
 
-  #define X_HARDWARE_SERIAL  MSerial2
-  #define Y_HARDWARE_SERIAL  MSerial2
-  #define Z_HARDWARE_SERIAL  MSerial2
-  #define E0_HARDWARE_SERIAL MSerial2
+  #define X_HARDWARE_SERIAL  MSerial4
+  #define Y_HARDWARE_SERIAL  MSerial4
+  #define Z_HARDWARE_SERIAL  MSerial4
+  #define E0_HARDWARE_SERIAL MSerial4
 
   //
   // TMC2208 Software serial
@@ -125,8 +140,9 @@
 //
 // Temperature Sensors
 //
-#define TEMP_0_PIN         PB1   // TH1
-#define TEMP_BED_PIN       PB0   // TB1
+#define TEMP_0_PIN         PA0   // TH1
+//#define TEMP_0_PIN         PB1   // TH1
+#define TEMP_BED_PIN       PC3   // TB1
 
 //
 // Heaters / Fans
@@ -137,12 +153,26 @@
 // #define FAN_PIN            PB15  // FAN
 // #define FAN_SOFT_PWM
 
-#define HEATER_0_PIN       PA1   // HEATER1
-#define HEATER_BED_PIN     PA2   // HOT BED
+#define HEATER_0_PIN       PC8   // HEATER1
+#define HEATER_BED_PIN     PC9   // HOT BED
 
-#define FAN_PIN            PA0   // FAN
+#define FAN_PIN            PC6   // FAN
 #define FAN_SOFT_PWM
 
+
+#if ENABLED(CR10_STOCKDISPLAY)
+
+    #define BTN_ENC            PA15
+    #define BTN_EN1            PA9
+    #define BTN_EN2            PA10
+
+    #define LCD_PINS_RS        PB8
+    #define LCD_PINS_ENABLE    PB15
+    #define LCD_PINS_D4        PB9
+
+    #define BEEPER_PIN          PB5
+
+#endif
 
 /* RET6 12864 LCD */
 // #define LCD_PINS_RS        PB12
@@ -181,11 +211,31 @@
 
 // #define BEEPER_PIN         PA5
 
+//
+// USB connect control
+//
+#define USB_CONNECT_PIN    PA14
+#define USB_CONNECT_INVERTING false
 
-/* SD card detect */
-#define SD_DETECT_PIN      PC7
 
-#define LED_CONTROL_PIN    PA6
-#define CHECK_MATWEIAL     PA7
+
+#define LED_CONTROL_PIN    PA13
+#define CHECK_MATWEIAL     PC15
 // #define OPTO_SWITCH_PIN    PB2   // certification
-#define OPTO_SWITCH_PIN    PC6
+#define OPTO_SWITCH_PIN    PC2
+
+
+//
+// SD Support
+//
+#define HAS_ONBOARD_SD
+
+#ifndef SDCARD_CONNECTION
+  #define SDCARD_CONNECTION ONBOARD
+#endif
+
+#define ON_BOARD_SPI_DEVICE 1    // SPI1
+#define ONBOARD_SD_CS_PIN  PA4   // Chip select for "System" SD card
+/* SD card detect */
+#define SD_DETECT_PIN      PC4A
+#define NEOPIXEL_PIN       PA8     

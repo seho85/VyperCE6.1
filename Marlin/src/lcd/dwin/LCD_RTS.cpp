@@ -36,8 +36,8 @@ float last_zoffset = 0.0;
 
 int power_off_type_yes = 0;
 
-const float manual_feedrate_mm_m[] = { 50*60, 50*60, 4*60, 60 };
-
+//const float manual_feedrate_mm_m_S[] = MANUAL_FEEDRATE;
+const float manual_feedrate_mm_m_S[]={ 50*60, 50*60, 4*60, 60 };
 HMI_ValueTypeDef HMI_ValueStruct;
 
 bool heat_flag = 0;
@@ -100,7 +100,7 @@ inline void RTS_line_to_current(AxisEnum axis)
 {
   if (!planner.is_full())
   {
-    planner.buffer_line(current_position, MMM_TO_MMS(manual_feedrate_mm_m[(int8_t)axis]), active_extruder);
+    planner.buffer_line(current_position, MMM_TO_MMS(manual_feedrate_mm_m_S[(int8_t)axis]), active_extruder);
   }
 }
 
@@ -220,26 +220,34 @@ void RTSSHOW::RTS_SDCardUpate(void)
   }
 }
 
+#include "Flash.h"
+#define EEPROM_START_ADDRESST (0x8000000UL + (512 * 1024)- 2 *  (0x800U))
+#define SIGN_ADDRESS (EEPROM_START_ADDRESST - 0x800) //reserve the last page (2KB) to save user parameters
+
 #define DEFAULT_LANGUAGE 0	// 0: EN, 1: CN
-bool first_load_language = 0;
+uint8 first_load_language = 0;
 void lcd_select_language(void)
 {
-  BL24CXX_Read(FONT_EEPROM+2, (uint8_t*)&first_load_language, sizeof(first_load_language));
+  STM32_FlashRead(SIGN_ADDRESS+0x800,&first_load_language,sizeof(first_load_language));
+  //BL24CXX_Read(FONT_EEPROM+2, (uint8_t*)&first_load_language, sizeof(first_load_language));
   delay(10);
   if(first_load_language == 0)
   {
-    BL24CXX_Read(FONT_EEPROM, (uint8_t*)&language_change_font, 1);
+     STM32_FlashRead(SIGN_ADDRESS,(uint8_t*)&language_change_font,1);
+ //   BL24CXX_Read(FONT_EEPROM, (uint8_t*)&language_change_font, 1);
   }
   else
   {
     first_load_language = 0;
-    BL24CXX_Write(FONT_EEPROM+2, (uint8_t*)&first_load_language, sizeof(first_load_language));
+    STM32_FlashWrite(SIGN_ADDRESS+0x800,(uint8_t*)&first_load_language, sizeof(first_load_language));
+  //  BL24CXX_Write(FONT_EEPROM+2, (uint8_t*)&first_load_language, sizeof(first_load_language));
     #if ENABLED(DEFAULT_LANGUAGE)
       language_change_font = 1;
     #else
       language_change_font = 0;
     #endif
-    BL24CXX_Write(FONT_EEPROM, (uint8_t*)&language_change_font, 1);
+    STM32_FlashWrite(SIGN_ADDRESS,(uint8_t*)&language_change_font, 1);
+  //  BL24CXX_Write(FONT_EEPROM, (uint8_t*)&language_change_font, 1);
   }
 }
 
@@ -1394,7 +1402,8 @@ void RTSSHOW::RTS_HandleData()
         change_page_font = 47;
       }
       RTS_SndData(language_change_font + 7, SYSTEM_LANGUAGE_TEXT_VP);
-      BL24CXX_Write(FONT_EEPROM, (uint8_t*)&language_change_font, 1);
+      STM32_FlashWrite(SIGN_ADDRESS,(uint8_t*)&language_change_font, 1);
+      //BL24CXX_Write(FONT_EEPROM, (uint8_t*)&language_change_font, 1);
       break;
     case PowerContinuePrintKey:
       if(recdat.data[0] == 1)

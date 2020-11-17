@@ -677,7 +677,12 @@ void idle(
   #ifdef DWIN_LCDDISPLAY
     DWIN_Update();
   #elif ENABLED(RTS_AVAILABLE)
-    RTSUpdate();
+  
+    RTSUpdate();  
+    #ifdef CR10_STOCKDISPLAY
+    ui.update();
+    #endif
+
   #else
     ui.update();
   #endif
@@ -863,9 +868,12 @@ void stop() {
  *    • status LEDs
  */
 void setup() {
-
+  
+  pinMode(LED_CONTROL_PIN,OUTPUT);
+  digitalWrite(LED_CONTROL_PIN,0);
   HAL_init();
-
+ pinMode(LED_CONTROL_PIN,OUTPUT);
+  digitalWrite(LED_CONTROL_PIN,0);
   #if HAS_DRIVER(L6470)
     L6470.init();         // setup SPI and then init chips
   #endif
@@ -896,9 +904,9 @@ void setup() {
     runout.setup();
   #endif
 
-  #if ENABLED(POWER_LOSS_RECOVERY)
-    recovery.setup();
-  #endif
+  // #if ENABLED(POWER_LOSS_RECOVERY)
+  //   recovery.setup();
+  // #endif
 
   setup_killpin();
 
@@ -1048,6 +1056,9 @@ void setup() {
 
   #if ENABLED(USE_CONTROLLER_FAN)
     SET_OUTPUT(CONTROLLER_FAN_PIN);
+  #else
+    SET_OUTPUT(CONTROLLER_FAN_PIN);
+    digitalWrite(CONTROLLER_FAN_PIN,1);
   #endif
 
   #if HAS_STEPPER_RESET
@@ -1171,11 +1182,13 @@ void setup() {
   #endif
 
   #ifdef MYI2C_EEPROM
-    BL24CXX_Init();
-    if(BL24CXX_Check()) // no found I2C_EEPROM
-      SERIAL_ECHOLN("I2C_EEPROM Check Failed!");
-    else
-      SERIAL_ECHOLN("I2C_EEPROM Check Successed!");      
+    // if(BL24CXX_Check()) // no found I2C_EEPROM
+    // {
+    // BL24CXX_Init();
+    // SERIAL_ECHOLN("I2C_EEPROM Check Failed!");
+    // }
+    // else
+    //   SERIAL_ECHOLN("I2C_EEPROM Check Successed!");      
   #endif
 
   #if ENABLED(POWER_LOSS_RECOVERY)
@@ -1198,7 +1211,7 @@ void setup() {
       SET_INPUT(OPTO_SWITCH_PIN);
       OUT_WRITE(LED_CONTROL_PIN, 0);
 		#endif
-
+  //  SERIAL_ECHO("Test-1\r\n");
   #endif
 }
 
@@ -1211,17 +1224,26 @@ void setup() {
  *  - Call inactivity manager
  */
 void loop() {
-
+  // SERIAL_ECHO("Test-2\r\n");
   for (;;) {
+    
+   // thermalManager.init();  
 
     idle(); // Do an idle first so boot is slightly faster
+   
 
     #if ENABLED(SDSUPPORT)
       card.checkautostart();
       if (card.flag.abort_sd_printing) abortSDPrinting();
     #endif
 
+   
+
     queue.advance();
+
+    // #if HAS_TEMP_ADC_0
+    // HAL_ANALOG_SELECT(TEMP_0_PIN);
+    // #endif
 
     endstops.event_handler();
   }

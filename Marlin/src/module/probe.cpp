@@ -739,14 +739,25 @@ float probe_at_point(const float &rx, const float &ry, const ProbePtRaise raise_
   #endif
 
   float measured_z = NAN;
-  if (!DEPLOY_PROBE()) {
-    measured_z = run_z_probe() + probe_offset.z;
 
+  if (!DEPLOY_PROBE()) {
+
+    measured_z = run_z_probe() + probe_offset.z;
+     
     const bool big_raise = raise_after == PROBE_PT_BIG_RAISE;
+
     if (big_raise || raise_after == PROBE_PT_RAISE)
-      do_blocking_move_to_z(current_position.z + (big_raise ? 25 : Z_CLEARANCE_BETWEEN_PROBES), MMM_TO_MMS(Z_PROBE_SPEED_FAST));
+    {
+     do_blocking_move_to_z(current_position.z + (big_raise ? 25 : Z_CLEARANCE_BETWEEN_PROBES), MMM_TO_MMS(Z_PROBE_SPEED_FAST));
+     
+    }
+     
     else if (raise_after == PROBE_PT_STOW)
-      if (STOW_PROBE()) measured_z = NAN;
+    {
+       if (STOW_PROBE()) measured_z = NAN;
+    
+    }
+     
   }
 
   #ifdef FIX_MOUNTED_PROBE
@@ -758,7 +769,6 @@ float probe_at_point(const float &rx, const float &ry, const ProbePtRaise raise_
     SERIAL_ECHOPAIR_F(" Y: ", LOGICAL_Y_POSITION(ry), 3);
     SERIAL_ECHOLNPAIR_F(" Z: ", measured_z, 3);
   }
-
   feedrate_mm_s = old_feedrate_mm_s;
 
   if (isnan(measured_z)) {
@@ -773,7 +783,6 @@ float probe_at_point(const float &rx, const float &ry, const ProbePtRaise raise_
     LCD_MESSAGEPGM(MSG_LCD_PROBING_FAILED);
     SERIAL_ERROR_MSG(MSG_ERR_PROBING_FAILED);
   }
-
   if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("<<< probe_at_point");
 
   return measured_z;

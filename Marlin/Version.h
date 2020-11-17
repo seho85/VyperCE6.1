@@ -26,19 +26,19 @@
 ////////////////////////////
 
 #define MACHINE_SIZE  "235x235x250"
-#define	CORP_WEBSITE_C	"www.cxsw3d.com"
-#define	CORP_WEBSITE_E	"www.creality.com"
+#define	CORP_WEBSITE_C	"www.bigtree-tech.com"
+#define	CORP_WEBSITE_E	"www.bigtree-tech.com"
 
 /**
  * Marlin release version identifier
  */
-#define SHORT_BUILD_VERSION "Ver 1.0.3.6"
-
+//#define SHORT_BUILD_VERSION "Ver 1.0.3.6"
+#define SHORT_BUILD_VERSION "BTT-SKR-CR6 V1.0"
 /**
  * Verbose version identifier which should contain a reference to the location
  * from where the binary was downloaded or the source code was compiled.
  */
-#define DETAILED_BUILD_VERSION "Creality 3D"
+#define DETAILED_BUILD_VERSION "BIGBREETECH"
 
 /**
  * The STRING_DISTRIBUTION_DATE represents when the binary file was built,
@@ -69,7 +69,7 @@
  * The WEBSITE_URL is the location where users can get more information such as
  * documentation about a specific Marlin release.
  */
-#define WEBSITE_URL "www.creality.com"
+#define WEBSITE_URL "www.bigtree-tech.com"
 
 /**
  * Set the vendor info the serial USB interface, if changable

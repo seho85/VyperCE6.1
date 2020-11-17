@@ -4,14 +4,16 @@
 #include "../../inc/MarlinConfigPre.h"
 #include "../../Marlin.h"
 
-
+#ifdef MYI2C_EEPROM
 /******************** IIC ********************/
 
 //初始化IIC
 void IIC_Init(void)
-{					     
-  SET_OUTPUT(IIC_EEPROM_SDA);
-  SET_OUTPUT(IIC_EEPROM_SCL);
+{	
+	pinMode(IIC_EEPROM_SDA,OUTPUT);		
+	pinMode(IIC_EEPROM_SDA,OUTPUT);				     
+//   SET_OUTPUT(IIC_EEPROM_SDA);
+//   SET_OUTPUT(IIC_EEPROM_SCL);
  
 	IIC_SCL_1();
 	IIC_SDA_1();
@@ -269,3 +271,4 @@ void BL24CXX_Write(uint16_t WriteAddr,uint8_t *pBuffer,uint16_t NumToWrite)
 	delay(10);
 }
 
+#endif
