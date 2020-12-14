@@ -1013,6 +1013,13 @@ G29_TYPE GcodeSuite::G29() {
 
   do_blocking_move_to_xy(safe_homing_xy);
 
+  #ifdef RTS_AVAILABLE
+    digitalWrite(COM_PIN, HIGH);
+    delay(200);
+    digitalWrite(COM_PIN, LOW);
+    delay(200);
+  #endif
+
   G29_RETURN(isnan(measured_z));
 }
 
