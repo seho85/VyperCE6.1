@@ -131,17 +131,17 @@
 //
 // Heaters / Fans
 /*certification*/
-// #define HEATER_0_PIN       PB14  // HEATER1
-// #define HEATER_BED_PIN     PB13  // HOT BED
+#define HEATER_0_PIN       PB14  // HEATER1
+#define HEATER_BED_PIN     PB13  // HOT BED
 
-// #define FAN_PIN            PB15  // FAN
-// #define FAN_SOFT_PWM
-
-#define HEATER_0_PIN       PA1   // HEATER1
-#define HEATER_BED_PIN     PA2   // HOT BED
-
-#define FAN_PIN            PA0   // FAN
+#define FAN_PIN            PB15  // FAN
 #define FAN_SOFT_PWM
+
+// #define HEATER_0_PIN       PA1   // HEATER1
+// #define HEATER_BED_PIN     PA2   // HOT BED
+
+// #define FAN_PIN            PA0   // FAN
+// #define FAN_SOFT_PWM
 
 
 /* RET6 12864 LCD */
@@ -187,5 +187,5 @@
 
 #define LED_CONTROL_PIN    PA6
 #define CHECK_MATWEIAL     PA7
-// #define OPTO_SWITCH_PIN    PB2   // certification
-#define OPTO_SWITCH_PIN    PC6
+#define OPTO_SWITCH_PIN    PB2   // certification
+// #define OPTO_SWITCH_PIN    PC6

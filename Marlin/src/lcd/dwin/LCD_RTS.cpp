@@ -29,6 +29,7 @@
 
 char errorway = 0;
 char errornum = 0;
+char error_sd_num = 0;
 
 bool StartPrint_flag = 0;
 
@@ -1703,6 +1704,11 @@ void RTSSHOW::RTS_HandleData()
             RTS_SndData(ExchangePageBase + 28, ExchangepageAddr);
             change_page_font = 28;
           }
+        }
+
+        if(errorway = 4)
+        {
+          nvic_sys_reset();   // reboot
         }
       }
       break;

@@ -39,6 +39,7 @@
 #define Error_201   "201 (Command Timeout)"   // The command too much inactive time
 #define Error_202   "202 (Homing Failed)"     // Homing Failed
 #define Error_203   "203 (Probing Failed)"    // Probing Failed
+#define Error_204   "204 (Click Reboot)"     // SD Read Error
 
 /*variable addr*/
 #define ExchangepageAddr                0x0084
@@ -249,5 +250,6 @@ extern bool StartPrint_flag;
 
 extern char errorway;
 extern char errornum;
+extern char error_sd_num;
 
 #endif// RTS_H

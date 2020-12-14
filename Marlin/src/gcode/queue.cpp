@@ -568,7 +568,20 @@ void GCodeQueue::get_serial_commands() {
           #endif          
         }
         else if (n == -1)
+        {
+          error_sd_num++;
           SERIAL_ERROR_MSG(MSG_SD_ERR_READ);
+          if(error_sd_num > 50)
+          {
+            waitway = 0;
+            rtscheck.RTS_SndData(ExchangePageBase + 62, ExchangepageAddr);
+            change_page_font = 62;
+            rtscheck.RTS_SndData(Error_204, ABNORMAL_TEXT_VP);
+            errorway = 4;
+          }
+        }
+
+        if(n != -1) error_sd_num = 0;
 
         if (sd_char == '#') stop_buffering = true;
 
