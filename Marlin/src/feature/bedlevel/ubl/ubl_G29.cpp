@@ -38,6 +38,10 @@
   #include "../../../gcode/gcode.h"
   #include "../../../libs/least_squares_fit.h"
 
+  #if EITHER(PROBE_TEMP_COMPENSATION, PREHEAT_BEFORE_LEVELING)
+  #include "../../../module/temperature.h"
+  #endif
+
   #if HAS_MULTI_HOTEND
     #include "../../../module/tool_change.h"
   #endif
@@ -728,6 +732,10 @@
      * This attempts to fill in locations closest to the nozzle's start location first.
      */
     void unified_bed_leveling::probe_entire_mesh(const xy_pos_t &nearby, const bool do_ubl_mesh_map, const bool stow_probe, const bool do_furthest) {
+      #if ENABLED(PREHEAT_BEFORE_LEVELING)
+        probe.preheat_for_probing(LEVELING_NOZZLE_TEMP, LEVELING_BED_TEMP);
+      #endif
+
       probe.deploy(); // Deploy before ui.capture() to allow for PAUSE_BEFORE_DEPLOY_STOW
 
       TERN_(HAS_LCD_MENU, ui.capture());
