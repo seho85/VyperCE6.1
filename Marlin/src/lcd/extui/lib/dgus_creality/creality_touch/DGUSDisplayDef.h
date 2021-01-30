@@ -354,8 +354,16 @@ constexpr uint16_t VP_BUTTON_HEATLOADSTARTKEY = 0x1056;
 // Additional stuff defined by Creality
 constexpr uint16_t VP_FAN_TOGGLE = 0x101E;
 constexpr uint16_t VP_LED_TOGGLE = 0x101F;
+
+// Mesh leveling
 constexpr uint16_t VP_MESH_LEVEL_TEMP = 0x108A;
 constexpr uint16_t VP_MESH_LEVEL_STATUS = 0x108D;
+
+constexpr uint16_t VP_MESH_VALUE_START = 0x1300; // TODO: check correct VPs with @grobux
+constexpr uint16_t MESH_VALUE_VP_COUNT = 4 * 4;  // TODO: check correct VPs with @grobux
+constexpr uint16_t MESH_VALUE_VP_LENGTH = 4;     // TODO: check correct VPs with @grobux
+
+// Feed/retract
 constexpr uint16_t VP_FEED_AMOUNT = 0x1054;
 constexpr uint16_t VP_FEED_PROGRESS = 0x108e;
 

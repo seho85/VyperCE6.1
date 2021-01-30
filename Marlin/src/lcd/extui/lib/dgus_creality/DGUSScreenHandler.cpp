@@ -589,10 +589,44 @@ void DGUSScreenHandler::OnMeshLevelingStart() {
 }
 
 void DGUSScreenHandler::OnMeshLevelingUpdate(const int8_t xpos, const int8_t ypos) {
+  DGUS_VP_Variable tmpVp;
+  uint8_t abl_probe_index = 0;
+  for(uint8_t outer = 0; outer < GRID_MAX_POINTS_Y; outer++)
+  {
+    for (uint8_t inner = 0; inner < GRID_MAX_POINTS_X; inner++)
+    {
+      uint8_t xPoint = inner;
+      bool zig = 1; // (outer & 1); // != ((PR_OUTER_END) & 1);
+      if (zig) xPoint = (GRID_MAX_POINTS_X - 1) - inner;
+
+      xy_uint8_t point = {xPoint, outer};
+      if(xPoint== xpos && outer == ypos) {
+        auto vp = VP_MESH_VALUE_START + (abl_probe_index * MESH_VALUE_VP_LENGTH);
+
+        if (vp > (VP_MESH_VALUE_START + (MESH_VALUE_VP_COUNT * MESH_VALUE_VP_LENGTH))) {
+          break; // Handle overflow for more than the 4x4 mesh grid
+        }
+
+        auto meshPoint = ExtUI::getMeshPoint(point);
+
+        DEBUG_ECHOLNPAIR("Mesh adr: ", vp);
+        DEBUG_ECHOLNPAIR("Mesh Val: ", meshPoint);
+
+        tmpVp.VP = vp;
+        tmpVp.memadr = &meshPoint;
+
+        ScreenHandler.DGUSLCD_SendFloatAsLongValueToDisplay<3>(tmpVp);
+      }
+
+      ++abl_probe_index;
+    }
+  }
+
   if (MeshLevelIndex < 0) {
     // We're not leveling
     return;
   }
+
 
   MeshLevelIndex++;
 
@@ -1274,6 +1308,10 @@ void DGUSScreenHandler::GotoScreen(DGUSLCD_Screens screen, bool save_current_scr
   DEBUG_ECHOLNPAIR("Issuing command to go to screen: ", screen);
   dgusdisplay.RequestScreen(screen);
   UpdateNewScreen(screen, save_current_screen);
+}
+
+void DGUSScreenHandler::InitMesh() {
+  ExtUI::injectCommands_P("G29 W");
 }
 
 bool DGUSScreenHandler::loop() {
