@@ -411,6 +411,7 @@ private:
   }
 
 public: // Needed for VP auto-upload
+  static bool HasRGBSettings;
   static creality_dwin_settings_t Settings;
 };
 
