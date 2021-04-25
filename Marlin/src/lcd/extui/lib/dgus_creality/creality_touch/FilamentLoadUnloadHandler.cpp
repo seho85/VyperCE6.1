@@ -16,7 +16,7 @@
 #include "../../../../../module/planner.h"
 #include "../../../../../gcode/gcode.h"
 
-celsius_t FilamentLoadUnloadHandler::nozzle_temperature = 0;
+uint16_t FilamentLoadUnloadHandler::nozzle_temperature = 0;
 float FilamentLoadUnloadHandler::length = 0;
 
 void FilamentLoadUnloadHandler::Init() {

@@ -11,7 +11,7 @@ class FilamentLoadUnloadHandler {
         static void HandleLoadUnloadButton(DGUS_VP_Variable &var, void *val_ptr);
 
     public:
-        static celsius_t nozzle_temperature;
+        static uint16_t nozzle_temperature;
         static float length;
         
     private:
