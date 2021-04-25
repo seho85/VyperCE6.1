@@ -511,10 +511,6 @@ constexpr uint16_t ICON_RGB_SETTINGS_AVAILABLE = 28;
 constexpr uint16_t ICON_RGB_SETTINGS_UNAVAILABLE = 29;
 
 
-constexpr uint16_t VP_RGB_NAV_BUTTON_ICON = 0x239E;
-constexpr uint16_t ICON_RGB_SETTINGS_AVAILABLE = 28;
-constexpr uint16_t ICON_RGB_SETTINGS_UNAVAILABLE = 29;
-
 // Filament load/unload
 constexpr uint16_t VP_FILCHANGE_NAV_BUTTON = 0x23a6;
 
