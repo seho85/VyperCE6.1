@@ -1108,14 +1108,14 @@ void DGUSScreenHandler::HandleAllHeatersOff(DGUS_VP_Variable &var, void *val_ptr
 }
 
 void DGUSScreenHandler::HandleTemperatureChanged(DGUS_VP_Variable &var, void *val_ptr) {
-  celsius_t newvalue = swap16(*(uint16_t*)val_ptr);
-  celsius_t acceptedvalue;
+  uint16_t newvalue = swap16(*(uint16_t*)val_ptr);
+  uint16_t acceptedvalue;
 
   switch (var.VP) {
     default: return;
     #if HOTENDS >= 1
       case VP_T_E0_Set:
-        NOMORE(newvalue, thermalManager.hotend_max_target(0));
+        NOMORE(newvalue, thermalManager.heater_maxtemp[0]);
         thermalManager.setTargetHotend(newvalue, 0);
         acceptedvalue = thermalManager.degTargetHotend(0);
         break;

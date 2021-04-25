@@ -78,7 +78,7 @@ void FilamentLoadUnloadHandler::ChangeFilamentWithTemperature(PGM_P command) {
         SetStatusMessage(PSTR("Heating up..."));
 
         uint16_t target_celsius = nozzle_temperature;
-        NOMORE(target_celsius, thermalManager.hotend_max_target(0));
+        NOMORE(target_celsius, thermalManager.heater_maxtemp[0]);
 
         thermalManager.setTargetHotend(target_celsius, ExtUI::H0);
         thermalManager.wait_for_hotend(ExtUI::H0, false);
