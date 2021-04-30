@@ -36,7 +36,7 @@ if ($LASTEXITCODE -ne 0) {
 
 [string] $CurrentBranch = $(git branch --show-current)
 $CurrentBranch = $CurrentBranch.Trim()
-$TargetBranch = if ($CurrentBranch -eq "extui") { "2.0.x" } else { "bugfix-2.0.x "}
+$TargetBranch = if ($CurrentBranch -eq "extui") { "2.0.x" } else { "bugfix-2.0.x"}
 
 Write-Info "Merging upstream/$TargetBranch..."
 git merge "upstream/$TargetBranch" --no-ff
