@@ -365,6 +365,7 @@ constexpr uint16_t VP_PLR_TOGGLE_ICON = 0x230F;
 
 // Mesh leveling
 constexpr uint16_t VP_LEVELING_NAV_BUTTON = 0x238a;
+constexpr uint16_t VP_LEVELING_EDIT_NAV_BUTTON = 0x23A8;
 
 constexpr uint16_t VP_MESH_SCREEN_MESSAGE_ICON = 0x22cb;
 constexpr uint16_t MESH_SCREEN_MESSAGE_ICON_LEVELING = 5;
@@ -436,6 +437,7 @@ constexpr uint16_t SP_X_POSITION = 0x4000;
 constexpr uint16_t VP_Y_POSITION = 0x104A;
 constexpr uint16_t SP_Y_POSITION = 0x4030;
 constexpr uint16_t VP_Z_POSITION = 0x104C;
+constexpr uint16_t VP_Z_POSITION_PRECISION = 0x108F;
 constexpr uint16_t SP_Z_POSITION = 0x4060;
 constexpr uint16_t VP_BUTTON_MOVEKEY = 0x1046;
 
