@@ -719,7 +719,9 @@ const struct DGUS_VP_Variable ListOfVP[] PROGMEM = {
     VPHELPER(VP_RGB_CONTROL_B, &leds.color.b, ScreenHandler.HandleLED, ScreenHandler.SendLEDToDisplay),
 
     #if EITHER(RGBW_LED, NEOPIXEL_LED)
-      VPHELPER(VP_RGB_CONTROL_W, &leds.color.w, ScreenHandler.HandleLED, ScreenHandler.SendLEDToDisplay),
+      #if (RGBW_LED || (NEOPIXEL_TYPE == NEO_GRBW))
+        VPHELPER(VP_RGB_CONTROL_W, &leds.color.w, ScreenHandler.HandleLED, ScreenHandler.SendLEDToDisplay),
+      #endif
 
       #if ENABLED(NEOPIXEL_LED)
         VPHELPER(VP_RGB_CONTROL_I, &leds.color.i, ScreenHandler.HandleLED, ScreenHandler.SendLEDToDisplay),
