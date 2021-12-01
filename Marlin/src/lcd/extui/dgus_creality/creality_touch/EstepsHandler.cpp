@@ -75,7 +75,12 @@ void EstepsHandler::HandleStartButton(DGUS_VP_Variable &var, void *val_ptr) {
     GcodeSuite::set_relative_mode(true);
     planner.extruder_advance_K[0] = 0;
 
-    ExtUI::injectCommands_P("G0 Z5 F150");
+    char cmd[64];
+
+    //ExtUI::injectCommands_P("G0 Z5 F150");
+    sprintf_P(cmd, PSTR("G0 Z5 F150"));
+    ExtUI::injectCommands_P(cmd);
+    //SERIAL_ECHOLNPAIR("Executing: ", cmd);
     queue.advance();
 
     // Heat up if necessary
@@ -91,15 +96,20 @@ void EstepsHandler::HandleStartButton(DGUS_VP_Variable &var, void *val_ptr) {
     // Set-up command
     SetStatusMessage(PSTR("Extruding..."));
 
-    char cmd[64];
-    sprintf_P(cmd, PSTR("G1 E%s F50"), filament_to_extrude);
+    char str_temp[6];
+    dtostrf(filament_to_extrude, 3, 1, str_temp);
+    sprintf_P(cmd, PSTR("G1 E%s F50"), str_temp);
+    SERIAL_ECHOLNPAIR("Executing: ", cmd);
 
     ExtUI::injectCommands(cmd);
     queue.advance();
     planner.synchronize();
 
     // Restore position
-    ExtUI::injectCommands_P("G0 Z-5 F150");
+    //ExtUI::injectCommands_P("G0 Z-5 F150");
+    sprintf_P(cmd, PSTR("G0 Z-5 F150"));
+    ExtUI::injectCommands_P(cmd);
+    //SERIAL_ECHOLNPAIR("Executing: ", cmd);
     queue.advance();
     planner.synchronize();
 
