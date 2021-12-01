@@ -22,7 +22,7 @@
 
 #include "../../../inc/MarlinConfigPre.h"
 
-#define DEBUG_ECHOLNPAIR DEBUG_ECHOLNPAIR
+//#define DEBUG_ECHOLNPAIR DEBUG_ECHOLNPAIR
 
 #if ENABLED(DGUS_LCD_UI_CREALITY_TOUCH)
 
@@ -30,6 +30,7 @@
 #include "DGUSDisplay.h"
 #include "DGUSVPVariable.h"
 #include "DGUSDisplayDef.h"
+#include "DGUSTunes.h"
 
 #include "../ui_api.h"
 #include "../../../MarlinCore.h"
@@ -422,13 +423,13 @@ void DGUSScreenHandler::DGUSLCD_SendPrintTimeRemainingToDisplay(DGUS_VP_Variable
 void DGUSScreenHandler::DGUSLCD_SendAboutFirmwareWebsite(DGUS_VP_Variable &var) {
   const char* websiteUrl = PSTR(WEBSITE_URL);
 
-  dgusdisplay.WriteVariablePGM(var.VP, websiteUrl, var.size, true);
+  dgusdisplay.WriteVariablePGM(var.VP, websiteUrl, var.size, true, '\0');
 }
 
 void DGUSScreenHandler::DGUSLCD_SendAboutFirmwareVersion(DGUS_VP_Variable &var) {
   const char* fwVersion = PSTR(SHORT_BUILD_VERSION);
 
-  dgusdisplay.WriteVariablePGM(var.VP, fwVersion, var.size, true);
+  dgusdisplay.WriteVariablePGM(var.VP, fwVersion, var.size, true, '\0');
 }
 
 void DGUSScreenHandler::DGUSLCD_SendAboutPrintSize(DGUS_VP_Variable &var) {
@@ -801,7 +802,7 @@ void DGUSScreenHandler::OnMeshLevelingUpdate(const int8_t x, const int8_t y, con
     if (GetPreviousScreen() == DGUSLCD_SCREEN_ZOFFSET_LEVEL) {
       // If the user is in the leveling workflow (not printing), get that hotend out of the way
       char gcodeBuffer[50] = {0};
-      sprintf_P(gcodeBuffer, PSTR("G0 F3500 X%d\nG0 Y%d\nG0 Z%d\nM84"), (X_BED_SIZE / 2), (Y_BED_SIZE / 2), 35);
+      sprintf_P(gcodeBuffer, PSTR("G0 F3500 Z%d\nG0 X%d\nG0 Y%d\nM84"), 35, (X_BED_SIZE / 2), (Y_BED_SIZE / 2));
       queue.inject(gcodeBuffer);
 
       // Change text at the top
@@ -1221,7 +1222,8 @@ void DGUSScreenHandler::HandleScreenVersion(DGUS_VP_Variable &var, void *val_ptr
 
   if (actualScreenVersion == EXPECTED_UI_VERSION_MAJOR) {
     SERIAL_ECHOLN("Screen version check passed.");
-    return;
+    PlayTune(TUNE_PIN, Anycubic_PowerOn, 1);         // take 3500 ms
+  return;
   }
 
   // Dump error to serial
