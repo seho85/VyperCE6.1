@@ -21,7 +21,7 @@ float FilamentLoadUnloadHandler::length = 0;
 
 void FilamentLoadUnloadHandler::Init() {
     nozzle_temperature = ui.material_preset[0].hotend_temp;
-    length = 150;
+    length = 450;
 
     if (ExtUI::isPrinting()) {
         nozzle_temperature = ExtUI::getTargetTemp_celsius(ExtUI::extruder_t::E0);
@@ -36,10 +36,11 @@ void FilamentLoadUnloadHandler::HandleTemperature(DGUS_VP_Variable &var, void *v
 
 void FilamentLoadUnloadHandler::HandleLoadUnloadButton(DGUS_VP_Variable &var, void *val_ptr) {
     // Common for load/unload -> determine minimum temperature
-    if (length < 0.1) {
-        SetStatusMessage("Invalid feed length");
-        return;
-    }
+    // remove check for 0 length since 0 is now used to switch to internal length values
+    //if (length < 0.1) {
+    //    SetStatusMessage("Invalid feed length");
+    //    return;
+    //}
 
     if (ExtUI::isPrinting() && !ExtUI::isPrintingPaused()) {
         SetStatusMessage(PSTR("Please pause print first"));
@@ -52,7 +53,11 @@ void FilamentLoadUnloadHandler::HandleLoadUnloadButton(DGUS_VP_Variable &var, vo
         case FILCHANGE_ACTION_LOAD_BUTTON:
             syncOperation.start();
 
-            ChangeFilamentWithTemperature(PSTR("M701 L%s P0"));
+            if(0 == length){
+                ChangeFilamentWithTemperature(PSTR("M701 T0")); // use internal set length
+            } else {
+                ChangeFilamentWithTemperature(PSTR("M701 L%s T0")); // use user set length
+            }
 
             syncOperation.done();
         break;
@@ -60,8 +65,11 @@ void FilamentLoadUnloadHandler::HandleLoadUnloadButton(DGUS_VP_Variable &var, vo
         case FILCHANGE_ACTION_UNLOAD_BUTTON:
             syncOperation.start();
 
-            ChangeFilamentWithTemperature(PSTR("M702 U%s"));
-
+            if(0 == length){
+                ChangeFilamentWithTemperature(PSTR("M702 T0")); // use internal set length
+            } else {
+                ChangeFilamentWithTemperature(PSTR("M702 U%s T0")); // use user set length
+            }
             syncOperation.done();
         break;
     }
@@ -88,10 +96,17 @@ void FilamentLoadUnloadHandler::ChangeFilamentWithTemperature(PGM_P command) {
     SetStatusMessage(PSTR("Filament load/unload..."));
 
     char cmd[64];
-    sprintf_P(cmd, command, length);
+
+    if (0 == length) {
+        sprintf_P(cmd, command);
+    } else {
+        char str_temp[10];
+        dtostrf(length, 3, 1, str_temp);
+        sprintf_P(cmd, command, str_temp);
+    }
     
     // Handle commands
-    SERIAL_ECHOPAIR("Injecting command: ", cmd);
+    SERIAL_ECHOLNPAIR("Injecting command: ", cmd);
     GcodeSuite::process_subcommands_now(cmd);
     SERIAL_ECHOPGM_P("- done");
 
