@@ -77,11 +77,11 @@ void AxisSettingsHandler::HandleNavigation(DGUS_VP_Variable &var, void *val_ptr)
             tmc_current = stepperX.getMilliamps();
 
             #if AXIS_HAS_STEALTHCHOP(X)
-            stealthchop = stepperX.get_stored_stealthChop();
+                stealthchop = stepperX.get_stored_stealthChop();
 
-            #if ENABLED(HYBRID_THRESHOLD)
-            hybrid_threshold = static_cast<uint32_t>(stepperX.get_pwm_thrs());
-            #endif
+                #if ENABLED(HYBRID_THRESHOLD)
+                    hybrid_threshold = static_cast<uint32_t>(stepperX.get_pwm_thrs());
+                #endif
             #endif
             break;
         #endif
@@ -91,11 +91,11 @@ void AxisSettingsHandler::HandleNavigation(DGUS_VP_Variable &var, void *val_ptr)
             tmc_current = stepperY.getMilliamps();
 
             #if AXIS_HAS_STEALTHCHOP(Y)
-            stealthchop = stepperY.get_stored_stealthChop();
+                stealthchop = stepperY.get_stored_stealthChop();
 
-            #if ENABLED(HYBRID_THRESHOLD)
-            hybrid_threshold = static_cast<uint32_t>(stepperY.get_pwm_thrs());
-            #endif
+                #if ENABLED(HYBRID_THRESHOLD)
+                    hybrid_threshold = static_cast<uint32_t>(stepperY.get_pwm_thrs());
+                #endif
             #endif
             break;
         #endif
@@ -105,11 +105,11 @@ void AxisSettingsHandler::HandleNavigation(DGUS_VP_Variable &var, void *val_ptr)
             tmc_current = stepperZ.getMilliamps();
 
             #if AXIS_HAS_STEALTHCHOP(Z)
-            stealthchop = stepperZ.get_stored_stealthChop();
+                stealthchop = stepperZ.get_stored_stealthChop();
 
-            #if ENABLED(HYBRID_THRESHOLD)
-            hybrid_threshold = static_cast<uint32_t>(stepperZ.get_pwm_thrs());
-            #endif
+                #if ENABLED(HYBRID_THRESHOLD)
+                    hybrid_threshold = static_cast<uint32_t>(stepperZ.get_pwm_thrs());
+                #endif
             #endif
             break;
         #endif
@@ -119,11 +119,11 @@ void AxisSettingsHandler::HandleNavigation(DGUS_VP_Variable &var, void *val_ptr)
             tmc_current = stepperE0.getMilliamps();
 
             #if AXIS_HAS_STEALTHCHOP(E0)
-            stealthchop = stepperE0.get_stored_stealthChop();
+                stealthchop = stepperE0.get_stored_stealthChop();
 
-            #if ENABLED(HYBRID_THRESHOLD)
-            hybrid_threshold = static_cast<uint32_t>(stepperE0.get_pwm_thrs());
-            #endif
+                #if ENABLED(HYBRID_THRESHOLD)
+                    hybrid_threshold = static_cast<uint32_t>(stepperE0.get_pwm_thrs());
+                #endif
             #endif
             break;
         #endif
@@ -158,11 +158,11 @@ void AxisSettingsHandler::HandleBackNavigation(DGUS_VP_Variable &var, void *val_
             stepperX.rms_current(tmc_current);
 
             #if AXIS_HAS_STEALTHCHOP(X)
-            stepperX.set_stealthChop(stealthchop);
+                stepperX.set_stealthChop(stealthchop);
 
-            #if ENABLED(HYBRID_THRESHOLD)
-            stepperX.set_pwm_thrs(hybrid_threshold);
-            #endif
+                #if ENABLED(HYBRID_THRESHOLD)
+                    stepperX.set_pwm_thrs(hybrid_threshold);
+                #endif
             #endif
             break;
         #endif
@@ -172,11 +172,11 @@ void AxisSettingsHandler::HandleBackNavigation(DGUS_VP_Variable &var, void *val_
             stepperY.rms_current(tmc_current);
 
             #if AXIS_HAS_STEALTHCHOP(Y)
-            stepperY.set_stealthChop(stealthchop);
+                stepperY.set_stealthChop(stealthchop);
 
-            #if ENABLED(HYBRID_THRESHOLD)
-            stepperY.set_pwm_thrs(hybrid_threshold);
-            #endif
+                #if ENABLED(HYBRID_THRESHOLD)
+                    stepperY.set_pwm_thrs(hybrid_threshold);
+                #endif
             #endif
             break;
         #endif
@@ -184,13 +184,21 @@ void AxisSettingsHandler::HandleBackNavigation(DGUS_VP_Variable &var, void *val_
         #if AXIS_IS_TMC(Z)
         case Z_AXIS:
             stepperZ.rms_current(tmc_current);
+            stepperZ2.rms_current(tmc_current);
 
             #if AXIS_HAS_STEALTHCHOP(Z)
-            stepperZ.set_stealthChop(stealthchop);
+                stepperZ.set_stealthChop(stealthchop);
 
-            #if ENABLED(HYBRID_THRESHOLD)
-            stepperZ.set_pwm_thrs(hybrid_threshold);
+                #if ENABLED(HYBRID_THRESHOLD)
+                    stepperZ.set_pwm_thrs(hybrid_threshold);
+                #endif
             #endif
+            #if AXIS_HAS_STEALTHCHOP(Z2)
+                stepperZ2.set_stealthChop(stealthchop);
+
+                #if ENABLED(HYBRID_THRESHOLD)
+                    stepperZ2.set_pwm_thrs(hybrid_threshold);
+                #endif
             #endif
             break;
         #endif
@@ -200,11 +208,11 @@ void AxisSettingsHandler::HandleBackNavigation(DGUS_VP_Variable &var, void *val_
             stepperE0.rms_current(tmc_current);
 
             #if AXIS_HAS_STEALTHCHOP(E0)
-            stepperE0.set_stealthChop(stealthchop);
+                stepperE0.set_stealthChop(stealthchop);
 
-            #if ENABLED(HYBRID_THRESHOLD)
-            stepperE0.set_pwm_thrs(hybrid_threshold);
-            #endif
+                #if ENABLED(HYBRID_THRESHOLD)
+                    stepperE0.set_pwm_thrs(hybrid_threshold);
+                #endif
             #endif
             break;
         #endif
