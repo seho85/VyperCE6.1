@@ -551,6 +551,8 @@
   #include "stm32f1/pins_CREALITY_V452.h"       // STM32F1                                env:STM32F103RET6_creality env:STM32F103RET6_creality_maple
 #elif MB(CREALITY_V453)
   #include "stm32f1/pins_CREALITY_V453.h"       // STM32F1                                env:STM32F103RET6_creality env:STM32F103RET6_creality_maple
+#elif MB(AC_TRI_F1_V1)
+  #include "stm32f1/pins_AC_TRI_F1_V1.h"       	// STM32F103RE                            env:STM32F103RET6_ac_tri_f1 env:STM32F103RET6_ac_tri_f1_maple
 #elif MB(TRIGORILLA_PRO)
   #include "stm32f1/pins_TRIGORILLA_PRO.h"      // STM32F1                                env:trigorilla_pro env:trigorilla_pro_maple
 #elif MB(FLY_MINI)
