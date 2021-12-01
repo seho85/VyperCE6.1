@@ -234,6 +234,43 @@ void PrintJobRecovery::save(const bool force/*=false*/, const float zraise/*=POW
 }
 
 #if PIN_EXISTS(POWER_LOSS)
+  extern uint32_t AD_DMA[3];
+
+    void PrintJobRecovery::outage() {
+      static uint8_t cnt = 0;
+      static uint32_t ad_dma_last = 0;
+
+      if(!enabled) {
+        return ;
+      }
+
+      if(AD_DMA[2] < 2300) {
+
+//        SERIAL_ECHOLNPAIR("v:", AD_DMA[2]);
+
+        if(cnt >= 3) {
+            _outage();
+        }
+
+        if(AD_DMA[2] < ad_dma_last) {
+            cnt++;
+        }
+
+      } else {
+
+        if(cnt != 0) {
+            cnt = 0;
+        }
+      }
+
+      ad_dma_last = AD_DMA[2];
+    }
+
+    void PrintJobRecovery::adc_raw() {
+        SERIAL_ECHOLNPAIR("AD_DMA[0]: ", AD_DMA[0]);
+        SERIAL_ECHOLNPAIR("AD_DMA[1]: ", AD_DMA[1]);
+        SERIAL_ECHOLNPAIR("AD_DMA[2]: ", AD_DMA[2]);
+    }
 
   #if ENABLED(BACKUP_POWER_SUPPLY)
 
@@ -286,6 +323,29 @@ void PrintJobRecovery::save(const bool force/*=false*/, const float zraise/*=POW
     #else
       constexpr float zraise = 0;
     #endif
+
+    WRITE(HEATER_0_PIN, 0);
+    WRITE(HEATER_BED_PIN, 0);
+    //ExtUI::onPowerLoss();
+    WRITE(X_ENABLE_PIN, 1);
+    WRITE(Y_ENABLE_PIN, 1);
+    WRITE(Z_ENABLE_PIN, 1);
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_SET);
+//    DISABLE_STEPPER_X();
+//    DISABLE_STEPPER_Y();
+//    DISABLE_STEPPER_Z();    // Z1
+//    DISABLE_STEPPER_E0();
+//    DISABLE_STEPPER_E1();   // Z2
+// shutdown fan
+//    WRITE(FAN_PIN, 0);      // FAN0
+//    WRITE(FAN1_PIN, 0);     // FAN1
+//    WRITE(PB1, 0);          // FAN2
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_14, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
+// shutdown led
+    WRITE(CASE_LIGHT_PIN, 0);
 
     // Save the current position, distance that Z was (or should be) raised,
     // and a flag whether the raise was already done here.
