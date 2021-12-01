@@ -39,16 +39,17 @@ void PIDHandler::Init() {
 
 void PIDHandler::HandleStartButton(DGUS_VP_Variable &var, void *val_ptr) {
     static_assert(ADVANCED_PAUSE_PURGE_LENGTH == 0, "Assuming PURGE_LENGTH is 0 so we can use M701");
+    // using temp we can tune PID for bed or hot end
+    int8_t target = -1;  // default to BED
 
     // Validate
-    if (calibration_temperature < EXTRUDE_MINTEMP) {
+    if((calibration_temperature < BED_MINTEMP) || (calibration_temperature > HEATER_0_MAXTEMP)) {
         SetStatusMessage(PSTR("Invalid temperature set"));
         return;
     }
 
-    if (calibration_temperature > HEATER_0_MAXTEMP) {
-        SetStatusMessage(PSTR("Invalid temperature set"));
-        return;
+    if (calibration_temperature > BED_MAXTEMP) {
+        target = 0;    // set to E0
     }
 
     if (cycles < 1) {
@@ -65,10 +66,14 @@ void PIDHandler::HandleStartButton(DGUS_VP_Variable &var, void *val_ptr) {
     const uint8_t fan_speed = fan_on ? 255 : 0;
 
     // Set-up command
-    SetStatusMessage(PSTR("PID tuning. Please wait..."));
+    if(0 == target) {
+        SetStatusMessage(PSTR("E0 PID tuning. Please wait..."));
+    } else {
+        SetStatusMessage(PSTR("Bed PID tuning. Please wait..."));
+    }
 
     char cmd[64]; // Add a G4 to allow the fan speed to take effect
-    sprintf_P(cmd, PSTR("M106 S%d\nG4 S2\nM303 S%d C%d U1"), fan_speed, calibration_temperature, cycles);
+    sprintf_P(cmd, PSTR("M106 S%d\nG4 S2\nM303 S%d C%d E%d U1"), fan_speed, calibration_temperature, cycles, target);
     SERIAL_ECHOLNPAIR("Executing: ", cmd);
 
     ExtUI::injectCommands(cmd);
