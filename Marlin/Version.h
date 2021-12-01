@@ -28,26 +28,38 @@
 /**
  * Marlin release version identifier
  */
-#define SHORT_BUILD_VERSION "CR6Comm-Rel6.2"
+#ifdef VYPER_BUILD
+    #define SHORT_BUILD_VERSION "Vyper-CE-6.1b"
+#elif defined VYPER_BUILD_LA
+    #define SHORT_BUILD_VERSION "Vyper-CE-6.1b(LA)"
+#elif defined VYPER_BUILD_LA_T
+    #define SHORT_BUILD_VERSION "Vyper-CE-6.1b(LA+T)"
+#elif defined VYPER_BUILD_LA_TE
+    #define SHORT_BUILD_VERSION "Vyper-CE-6.1b(LA+TE)"
+#else
+    #define SHORT_BUILD_VERSION "Vyper-CE-6.1b"
+#endif
 
 /**
  * Verbose version identifier which should contain a reference to the location
  * from where the binary was downloaded or the source code was compiled.
  */
-#define DETAILED_BUILD_VERSION "CR-6 community firmware - release 6.1 (based on Marlin 2.0.8.1)"
+#define DETAILED_BUILD_VERSION "Vyper community firmware - release 6.1 (based on Marlin 2.0.9.1)"
 
 /**
  * The STRING_DISTRIBUTION_DATE represents when the binary file was built,
  * here we define this default string as the date where the latest release
  * version was tagged.
  */
-#define STRING_DISTRIBUTION_DATE "2021-09-01"
+#define STRING_DISTRIBUTION_DATE "2021-11-30"
 
 
 /**
  * Defines a generic printer name to be output to the LCD after booting Marlin.
  */
-#define CUSTOM_MACHINE_NAME SHORT_BUILD_VERSION
+#ifndef CUSTOM_MACHINE_NAME
+    #define CUSTOM_MACHINE_NAME SHORT_BUILD_VERSION
+#endif
 #define MACHINE_NAME CUSTOM_MACHINE_NAME
 
 /**
@@ -56,7 +68,7 @@
  * has a distinct Github fork— the Source Code URL should just be the main
  * Marlin repository.
  */
-#define SOURCE_CODE_URL "https://github.com/CR6Community/Marlin"
+#define SOURCE_CODE_URL "https://github.com/VyperCommunity/Marlin"
 
 /**
  * Default generic printer UUID.
@@ -67,7 +79,7 @@
  * The WEBSITE_URL is the location where users can get more information such as
  * documentation about a specific Marlin release.
  */
-#define WEBSITE_URL "github.com/CR6Community"
+#define WEBSITE_URL "github.com/as_yet_unknown"
 
 /**
  * Set the vendor info the serial USB interface, if changable
