@@ -311,8 +311,8 @@ void DGUSDisplay::SetTouchScreenConfiguration(bool enable_standby, bool enable_s
   cfg_bits |= 1UL << 4; // 4: auto-upload should always be enabled
   if (enable_sound) cfg_bits |= 1UL << 3; // 3: audio
   if (enable_standby) cfg_bits |= 1UL << 2; // 2: backlight on standby
-  cfg_bits |= 1UL << 1; // 1 & 0: 270 degrees orientation of display
-  cfg_bits |= 1UL << 0; 
+  cfg_bits |= 1UL << 1; // 1 & 0: 270 degrees orientation of display, Vyper
+  //cfg_bits |= 1UL << 0; // 90 degrees, creality
 
   DEBUG_ECHOLNPAIR("Update touch screen config - standby ", enable_standby);
   DEBUG_ECHOLNPAIR("Update touch screen config - sound ", enable_sound);
