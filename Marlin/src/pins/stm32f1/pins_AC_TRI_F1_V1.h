@@ -112,6 +112,7 @@
 #define FAN1_PIN                            PA14 // Connected to +24V
 #define FAN2_PIN                            -1   // PB1, auto fan for E0
 #define CONTROLLER_FAN_PIN                  FAN1_PIN
+#define E0_AUTO_FAN_PIN                     PB1
 
 //
 // Misc
@@ -119,8 +120,8 @@
 #define LED_CONTROL_PIN                     PA13
 //#define BEEPER_PIN                          PB15
 #define TUNE_PIN                            PB15
-#define LED_PIN                             -1
-#define POWER_LOSS_PIN                      PA6
+#define LED_PIN                             PA8
+//#define POWER_LOSS_PIN                      PA6
 #define FIL_RUNOUT_PIN                      PA5
 #define CASE_LIGHT_PIN                      LED_CONTROL_PIN
 #define POWER_MONITOR_VOLTAGE_PIN           PA6
