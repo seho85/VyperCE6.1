@@ -78,7 +78,7 @@ void HAL_init() {
   #endif
 
   #if PIN_EXISTS(AUTO_LEVEL_TX)
-    OUT_WRITE(AUTO_LEVEL_TX_PIN, HIGH);
+    OUT_WRITE(AUTO_LEVEL_TX_PIN, HIGH);   // default tare pin high
   #endif
 
   #if ENABLED(SRAM_EEPROM_EMULATION)
@@ -152,58 +152,13 @@ extern "C" {
 // ------------------------
 // ADC
 // ------------------------
-ADC_HandleTypeDef hadc1;
-DMA_HandleTypeDef hdma_adc1;
-
-uint32_t AD_DMA[3];
-void HAL_adc_init()
-{
-  ADC_ChannelConfTypeDef sConfig = {0};
-  hadc1.Instance = ADC1;
-  hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
-  hadc1.Init.ContinuousConvMode = ENABLE;
-  hadc1.Init.DiscontinuousConvMode = DISABLE;
-  hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 3;
-  if (HAL_ADC_DeInit(&hadc1) != HAL_OK) {
-    SERIAL_ECHOLNPAIR("HAL_ADC_DeInit failed @ line: ", __LINE__);
-  }
-  if (HAL_ADC_Init(&hadc1) != HAL_OK) {
-    SERIAL_ECHOLNPAIR("HAL_ADC_Init failed @ line: ", __LINE__);
-  }
-  sConfig.Channel = ADC_CHANNEL_14;
-  sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    SERIAL_ECHOLNPAIR("HAL_ADC_ConfigChannel failed @ line: ", __LINE__);
-  }
-  sConfig.Channel = ADC_CHANNEL_8;
-  sConfig.Rank = ADC_REGULAR_RANK_2;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    SERIAL_ECHOLNPAIR("HAL_ADC_ConfigChannel failed @ line: ", __LINE__);
-  }
-  sConfig.Channel = ADC_CHANNEL_6;
-  sConfig.Rank = ADC_REGULAR_RANK_3;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    SERIAL_ECHOLNPAIR("HAL_ADC_ConfigChannel failed @ line: ", __LINE__);
-  }
-  HAL_ADCEx_Calibration_Start(&hadc1);
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t *)&AD_DMA, 3);
-}
-// TODO: Make sure this doesn't cause any delay
-void HAL_adc_start_conversion(const uint8_t adc_pin) {} // { HAL_adc_result = analogRead(adc_pin); }
-uint16_t HAL_adc_get_result() {return 1000;} // { return HAL_adc_result; }
 
 // Reset the system (to initiate a firmware flash)
 void flashFirmware(const int16_t) { HAL_reboot(); }
 
 // TODO: Make sure this doesn't cause any delay
-//void HAL_adc_start_conversion(const uint8_t adc_pin) { HAL_adc_result = analogRead(adc_pin); }
-//uint16_t HAL_adc_get_result() { return HAL_adc_result; }
+void HAL_adc_start_conversion(const uint8_t adc_pin) { HAL_adc_result = analogRead(adc_pin); }
+uint16_t HAL_adc_get_result() { return HAL_adc_result; }
 
 // Maple Compatibility
 volatile uint32_t systick_uptime_millis = 0;
