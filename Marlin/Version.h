@@ -29,15 +29,15 @@
  * Marlin release version identifier
  */
 #ifdef VYPER_BUILD
-    #define SHORT_BUILD_VERSION "Vyper-CE-6.1b"
+    #define SHORT_BUILD_VERSION "Vyper-CE-6.1c"
 #elif defined VYPER_BUILD_LA
-    #define SHORT_BUILD_VERSION "Vyper-CE-6.1b(LA)"
+    #define SHORT_BUILD_VERSION "Vyper-CE-6.1c(LA)"
 #elif defined VYPER_BUILD_LA_T
-    #define SHORT_BUILD_VERSION "Vyper-CE-6.1b(LA+T)"
+    #define SHORT_BUILD_VERSION "Vyper-CE-6.1c(LA+T)"
 #elif defined VYPER_BUILD_LA_TE
-    #define SHORT_BUILD_VERSION "Vyper-CE-6.1b(LA+TE)"
+    #define SHORT_BUILD_VERSION "Vyper-CE-6.1c(LA+TE)"
 #else
-    #define SHORT_BUILD_VERSION "Vyper-CE-6.1b"
+    #define SHORT_BUILD_VERSION "Vyper-CE-6.1c"
 #endif
 
 /**
@@ -51,7 +51,7 @@
  * here we define this default string as the date where the latest release
  * version was tagged.
  */
-#define STRING_DISTRIBUTION_DATE "2021-11-30"
+#define STRING_DISTRIBUTION_DATE "2021-12-22"
 
 
 /**
