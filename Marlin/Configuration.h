@@ -68,10 +68,10 @@
 // @section info
 
 // select build type here
-//#define VYPER_BUILD
-//#define VYPER_BUILD_LA
-//#define VYPER_BUILD_LA_T
-#define VYPER_BUILD_LA_TE
+//#define VYPER_BUILD       // standard
+//#define VYPER_BUILD_LA    // with linear advance and junction deviation enabled
+//#define VYPER_BUILD_LA_T  // as above but with uart connection to TMC2209's for x, y, z and z2
+#define VYPER_BUILD_LA_TE   // as above but with software serial connection to e stepper
 
 // Author info of this build printed to the host during boot and M115
 #define STRING_CONFIG_H_AUTHOR "(Paul Matthews, Vyper with TMC motherboard)" // Who made the changes.
@@ -913,7 +913,7 @@
 
 // Enable this feature if all enabled endstop pins are interrupt-capable.
 // This will remove the need to poll the interrupt pins, saving many CPU cycles.
-//#define ENDSTOP_INTERRUPTS_FEATURE
+#define ENDSTOP_INTERRUPTS_FEATURE
 
 /**
  * Endstop Noise Threshold
@@ -1251,10 +1251,10 @@
  * Useful for a strain gauge or piezo sensor that needs to factor out
  * elements such as cables pulling on the carriage.
  */
-//#define PROBE_TARE
+#define PROBE_TARE
 #if ENABLED(PROBE_TARE)
   //#define PROBE_ONCE            // Probe only once - useful to improve direct drive reliability
-  #define PROBE_TARE_TIME  250    // (ms) Time to hold tare pin
+  #define PROBE_TARE_TIME  300    // (ms) Time to hold tare pin
   #define PROBE_TARE_DELAY 250    // (ms) Delay after tare before
   #define PROBE_TARE_STATE LOW   // State to write pin for tare
   //#define PROBE_TARE_BUZZ       // Do a short buzz when the probe is tared - useful for debugging
@@ -1296,11 +1296,11 @@
 #define Z_CLEARANCE_MULTI_PROBE     5 // Z Clearance between multiple probes
 //#define Z_AFTER_PROBING           5 // Z position after probing is done
 
-#define Z_PROBE_LOW_POINT          -10 // Farthest distance below the trigger-point to go before stopping
+#define Z_PROBE_LOW_POINT          -2 // Farthest distance below the trigger-point to go before stopping
 
 // For M851 give a range for adjusting the Z probe offset
-#define Z_PROBE_OFFSET_RANGE_MIN -20
-#define Z_PROBE_OFFSET_RANGE_MAX 20
+#define Z_PROBE_OFFSET_RANGE_MIN -5
+#define Z_PROBE_OFFSET_RANGE_MAX 5
 
 // Enable the M48 repeatability test to test probe accuracy
 #define Z_MIN_PROBE_REPEATABILITY_TEST
@@ -1657,7 +1657,7 @@
     // Experimental Subdivision of the grid by Catmull-Rom method.
     // Synthesizes intermediate points to produce a more detailed mesh.
     //
-    //#define ABL_BILINEAR_SUBDIVISION
+    #define ABL_BILINEAR_SUBDIVISION
     #if ENABLED(ABL_BILINEAR_SUBDIVISION)
       // Number of subdivisions between probe points
       #define BILINEAR_SUBDIVISIONS 3
@@ -1763,7 +1763,7 @@
 // For DELTA this is the top-center of the Cartesian print volume.
 #define MANUAL_X_HOME_POS -1.0
 #define MANUAL_Y_HOME_POS -4.2
-#define MANUAL_Z_HOME_POS 2.9
+#define MANUAL_Z_HOME_POS  1.5  // for fixed stops, adjustable need to be fully out or changed to fixed
 
 /**
  * Use "Z Safe Homing" to avoid homing with a Z probe outside the bed area.
