@@ -482,6 +482,7 @@ inline bool prime_nozzle() {
       ui.quick_feedback();
     #endif
 
+    //if (user_canceled()) return G26_ERR;
     IF_ENABLED(EXTENSIBLE_UI, updateStatus_P(GET_TEXT(MSG_G26_FIXED_LENGTH)));
 
     destination = current_position;
@@ -503,24 +504,23 @@ inline bool prime_nozzle() {
     // Small prime
     const xyz_pos_t pp1 = { X_BED_SIZE - x_gp_size - x_offset, y_offset + 10, g26_layer_height };
     const xyz_pos_t pp2 = { x_gp_size + x_offset, y_offset + 10, g26_layer_height };
-    print_line_from_here_to_there(
-      pp1,
-      pp2
-    );
-    if (user_canceled()) return G26_ERR;
-
-    print_line_from_here_to_there(p1,p2);
-    if (user_canceled()) return G26_ERR;
-
-    print_line_from_here_to_there(p2,p3);
-    if (user_canceled()) return G26_ERR;
-
-    print_line_from_here_to_there(p3,p4);
-    if (user_canceled()) return G26_ERR;
-
-    print_line_from_here_to_there(p4,p1);
-    if (user_canceled()) return G26_ERR;
     
+    print_line_from_here_to_there(
+      pp2,
+      pp1
+    );
+    if (!user_canceled()) {
+      print_line_from_here_to_there(p2,p3);
+      if (!user_canceled()) {
+        print_line_from_here_to_there(p3,p4);
+        if (!user_canceled()) {
+          print_line_from_here_to_there(p4,p1);
+          if (!user_canceled()) {
+            print_line_from_here_to_there(p1,p2);
+          }
+        }
+      }
+    }
     retract_filament(destination);
   }
 
@@ -851,84 +851,88 @@ void GcodeSuite::G26() {
   IF_ENABLED(EXTENSIBLE_UI, ExtUI::onMeshValidationStarting());
   IF_ENABLED(EXTENSIBLE_UI, updateStatus_P(PSTR("Starting mesh validation...")));
 
-  if (turn_on_heaters() != G26_OK) goto LEAVE;
+  if (G26_OK == turn_on_heaters()) {
 
-  current_position.e = 0.0;
-  sync_plan_position_e();
+    current_position.e = 0.0;
+    sync_plan_position_e();
 
-  if (g26_prime_flag && prime_nozzle() != G26_OK) goto LEAVE;
-
-  /**
-   *  Bed is preheated
-   *
-   *  Nozzle is at temperature
-   *
-   *  Filament is primed!
-   *
-   *  It's  "Show Time" !!!
-   */
-
-  circle_flags.reset();
-  horizontal_mesh_line_flags.reset();
-  vertical_mesh_line_flags.reset();
-
-  // Move nozzle to the specified height for the first layer
-  destination = current_position;
-  destination.z = g26_layer_height;
-  move_to(destination, 0.0);
-  move_to(destination, g26_ooze_amount);
-
-  TERN_(HAS_LCD_MENU, ui.capture());
-
-  #if DISABLED(ARC_SUPPORT)
+    if (g26_prime_flag && !user_canceled())
+      prime_nozzle();
 
     /**
-     * Pre-generate radius offset values at 30 degree intervals to reduce CPU load.
+     *  Bed is preheated
+     *
+     *  Nozzle is at temperature
+     *
+     *  Filament is primed!
+     *
+     *  It's  "Show Time" !!!
      */
-    #define A_INT 30
-    #define _ANGS (360 / A_INT)
-    #define A_CNT (_ANGS / 2)
-    #define _IND(A) ((A + _ANGS * 8) % _ANGS)
-    #define _COS(A) (trig_table[_IND(A) % A_CNT] * (_IND(A) >= A_CNT ? -1 : 1))
-    #define _SIN(A) (-_COS((A + A_CNT / 2) % _ANGS))
-    #if A_CNT & 1
-      #error "A_CNT must be a positive value. Please change A_INT."
-    #endif
-    float trig_table[A_CNT];
-    LOOP_L_N(i, A_CNT)
-      trig_table[i] = INTERSECTION_CIRCLE_RADIUS * cos(RADIANS(i * A_INT));
 
-  #endif // !ARC_SUPPORT
+    circle_flags.reset();
+    horizontal_mesh_line_flags.reset();
+    vertical_mesh_line_flags.reset();
 
-  mesh_index_pair location;
-  do {
-    IF_ENABLED(EXTENSIBLE_UI, updateStatus_P(PSTR("Running pattern...")));
+    // Move nozzle to the specified height for the first layer
+    destination = current_position;
+    destination.z = g26_layer_height;
+    move_to(destination, 0.0);
+    move_to(destination, g26_ooze_amount);
 
-    // Find the nearest confluence
-    location = find_closest_circle_to_print(g26_continue_with_closest ? xy_pos_t(current_position) : g26_xy_pos);
+    TERN_(HAS_LCD_MENU, ui.capture());
 
-    if (location.valid()) {
-      const xy_pos_t circle = _GET_MESH_POS(location.pos);
+    #if DISABLED(ARC_SUPPORT)
 
-      // Draw a filled circle
-      float radius = INTERSECTION_CIRCLE_RADIUS;
-      bool cont = true;
-      while (radius > g26_nozzle && cont) {
-        cont = cont && draw_circle(radius, circle, location);
+      /**
+       * Pre-generate radius offset values at 30 degree intervals to reduce CPU load.
+       */
+      #define A_INT 30
+      #define _ANGS (360 / A_INT)
+      #define A_CNT (_ANGS / 2)
+      #define _IND(A) ((A + _ANGS * 8) % _ANGS)
+      #define _COS(A) (trig_table[_IND(A) % A_CNT] * (_IND(A) >= A_CNT ? -1 : 1))
+      #define _SIN(A) (-_COS((A + A_CNT / 2) % _ANGS))
+      #if A_CNT & 1
+        #error "A_CNT must be a positive value. Please change A_INT."
+      #endif
+      float trig_table[A_CNT];
+      LOOP_L_N(i, A_CNT)
+        trig_table[i] = INTERSECTION_CIRCLE_RADIUS * cos(RADIANS(i * A_INT));
 
-        radius -= g26_nozzle * 2;
-      }
+    #endif // !ARC_SUPPORT
 
-      if (!cont) break;
-      if (look_for_lines_to_connect()) goto LEAVE;
+    mesh_index_pair location;
+
+    if(!user_canceled()) {
+      do {
+        IF_ENABLED(EXTENSIBLE_UI, updateStatus_P(PSTR("Running pattern...")));
+
+        // Find the nearest confluence
+        location = find_closest_circle_to_print(g26_continue_with_closest ? xy_pos_t(current_position) : g26_xy_pos);
+
+        if (location.valid()) {
+          const xy_pos_t circle = _GET_MESH_POS(location.pos);
+
+          // Draw a filled circle
+          float radius = INTERSECTION_CIRCLE_RADIUS;
+          bool cont = true;
+          while (radius > g26_nozzle && cont) {
+            cont = cont && draw_circle(radius, circle, location);
+
+            radius -= g26_nozzle * 2;
+          }
+
+          if (!cont) break;
+          if (look_for_lines_to_connect()) goto LEAVE;
+        }
+
+        SERIAL_FLUSH(); // Prevent host M105 buffer overrun.
+      } while (--g26_repeats && location.valid() && TERN1(HAS_G26_CANCEL, !user_canceled()));
+
     }
-
-    SERIAL_FLUSH(); // Prevent host M105 buffer overrun.
-
-  } while (--g26_repeats && location.valid() && TERN1(HAS_G26_CANCEL, !user_canceled()));
-
-  planner.synchronize();
-
+    move_to(current_position.x, current_position.y, current_position.z + 5.0f, 0.0);  // Z lift to minimize scraping
+    planner.synchronize();
+  }
   LEAVE:
   IF_ENABLED(EXTENSIBLE_UI, ExtUI::resetCancelState());
   ui.set_status_P(GET_TEXT(MSG_G26_LEAVING), -1);
@@ -936,7 +940,7 @@ void GcodeSuite::G26() {
 
   planner.clear_block_buffer();
   char cmdBuffer[80] = {0};
-  sprintf_P(cmdBuffer, PSTR("G90\nG0 Z%d F2000\nG0 X%d Y%d"), max(Z_MAX_POS / 4, Z_HOMING_HEIGHT), X_BED_SIZE/4, ((Y_BED_SIZE) - ((Y_BED_SIZE) / 4)));
+  sprintf_P(cmdBuffer, PSTR("G90\nG0 Z10\nG27"));
   gcode.process_subcommands_now(cmdBuffer);
 
   #if DISABLED(NO_VOLUMETRICS)
