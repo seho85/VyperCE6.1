@@ -149,13 +149,12 @@ extern "C" {
   extern unsigned int _ebss; // end of bss section
 }
 
-// ------------------------
-// ADC
-// ------------------------
-
 // Reset the system (to initiate a firmware flash)
 void flashFirmware(const int16_t) { HAL_reboot(); }
 
+// ------------------------
+// ADC
+// ------------------------
 // TODO: Make sure this doesn't cause any delay
 void HAL_adc_start_conversion(const uint8_t adc_pin) { HAL_adc_result = analogRead(adc_pin); }
 uint16_t HAL_adc_get_result() { return HAL_adc_result; }
