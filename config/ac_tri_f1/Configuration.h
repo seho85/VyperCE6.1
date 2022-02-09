@@ -82,7 +82,7 @@
 //#define VYPER_BUILD_LA_TE   // as above but with software serial connection to e stepper
 
 // Leave undefined to home Z using two Z sensors (stock configuration)
-#define VYPER_NOZZLE_HOMING // home Z using nozzle sensor at middle of bed
+//#define VYPER_NOZZLE_HOMING // home Z using nozzle sensor at middle of bed
 
 // NOTE to use nozzle sensor any adjustable Z sensors must be set to maximum
 // extended length so sensor is detected before nozzle reaches bed
