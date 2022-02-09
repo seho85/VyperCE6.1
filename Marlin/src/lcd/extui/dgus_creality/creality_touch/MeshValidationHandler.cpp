@@ -109,24 +109,24 @@ void MeshValidationHandler::OnMeshValidationFinish() {
     if (started_from_screen) {
         ExtUI::setFeedrate_mm_s(prev_feedrate);
 
-        char gcodeBuffer[128] = {0};
+        //char gcodeBuffer[32] = {0};
         if (!is_cancelling) {
             // Present
             // - Set absolute mode
             // - Present bed, high Z
             // - Disable stepper
-            strcpy_P(gcodeBuffer, PSTR("M84"));
+            //strcpy_P(gcodeBuffer, PSTR("M84"));
 
             SetStatusMessage("Mesh validation pattern printed");
         } else {
             // Park and disable steppers
-            strcpy_P(gcodeBuffer, PSTR("G0 X5 F2000\nG27\nM84"));
+            //strcpy_P(gcodeBuffer, PSTR("G0 Z5 F2000\nG27 P2\nM84"));
 
             SetStatusMessage("Canceled mesh validation pattern");
         }
 
         // Enqueue
-        gcode.process_subcommands_now(gcodeBuffer);
+        //gcode.process_subcommands_now(gcodeBuffer);
     }
 
     // Reset state
