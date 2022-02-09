@@ -44,7 +44,7 @@ void EstepsHandler::Init() {
 
 
 void EstepsHandler::HandleStartButton(DGUS_VP_Variable &var, void *val_ptr) {
-    static_assert(ADVANCED_PAUSE_PURGE_LENGTH == 0, "Assuming PURGE_LENGTH is 0 so we can use M701");
+    //static_assert(ADVANCED_PAUSE_PURGE_LENGTH == 0, "Assuming PURGE_LENGTH is 0 so we can use M701");
 
     // Validate
     if (calibration_temperature < EXTRUDE_MINTEMP) {
@@ -69,17 +69,14 @@ void EstepsHandler::HandleStartButton(DGUS_VP_Variable &var, void *val_ptr) {
     // Prepare
     bool zAxisWasRelative = GcodeSuite::axis_is_relative(Z_AXIS);
     bool eAxisWasRelative = GcodeSuite::axis_is_relative(E_AXIS);
+#if ENABLED(LIN_ADVANCE)
     float kFactor = planner.extruder_advance_K[0];
-
+    planner.extruder_advance_K[0] = 0;
+#endif
     GcodeSuite::set_e_relative();
     GcodeSuite::set_relative_mode(true);
-    planner.extruder_advance_K[0] = 0;
 
-    char cmd[64];
-
-    //ExtUI::injectCommands_P("G0 Z5 F150");
-    sprintf_P(cmd, PSTR("G0 Z5 F150"));
-    ExtUI::injectCommands_P(cmd);
+    ExtUI::injectCommands_P("G0 Z5 F150");
     //SERIAL_ECHOLNPAIR("Executing: ", cmd);
     queue.advance();
 
@@ -96,6 +93,8 @@ void EstepsHandler::HandleStartButton(DGUS_VP_Variable &var, void *val_ptr) {
     // Set-up command
     SetStatusMessage(PSTR("Extruding..."));
 
+    char cmd[64];
+
     char str_temp[6];
     dtostrf(filament_to_extrude, 3, 1, str_temp);
     sprintf_P(cmd, PSTR("G1 E%s F50"), str_temp);
@@ -106,9 +105,7 @@ void EstepsHandler::HandleStartButton(DGUS_VP_Variable &var, void *val_ptr) {
     planner.synchronize();
 
     // Restore position
-    //ExtUI::injectCommands_P("G0 Z-5 F150");
-    sprintf_P(cmd, PSTR("G0 Z-5 F150"));
-    ExtUI::injectCommands_P(cmd);
+    ExtUI::injectCommands_P("G0 Z-5 F150");
     //SERIAL_ECHOLNPAIR("Executing: ", cmd);
     queue.advance();
     planner.synchronize();
@@ -116,8 +113,9 @@ void EstepsHandler::HandleStartButton(DGUS_VP_Variable &var, void *val_ptr) {
     // Restore defaults
     if (!zAxisWasRelative) GcodeSuite::set_relative_mode(false);
     if (!eAxisWasRelative) GcodeSuite::set_e_absolute();
+#if ENABLED(LIN_ADVANCE)
     planner.extruder_advance_K[0] = kFactor;
-
+#endif
     // Done
     ScreenHandler.GotoScreen(DGUSLCD_SCREEN_ESTEPS_CALIBRATION_RESULTS, false);
     ScreenHandler.Buzzer(0, 250);
