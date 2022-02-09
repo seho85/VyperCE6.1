@@ -21,7 +21,7 @@ float FilamentLoadUnloadHandler::length = 0;
 
 void FilamentLoadUnloadHandler::Init() {
     nozzle_temperature = ui.material_preset[0].hotend_temp;
-    length = 450;
+    length = 400;
 
     if (ExtUI::isPrinting()) {
         nozzle_temperature = ExtUI::getTargetTemp_celsius(ExtUI::extruder_t::E0);
