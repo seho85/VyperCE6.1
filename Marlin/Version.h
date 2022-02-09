@@ -51,7 +51,7 @@
  * here we define this default string as the date where the latest release
  * version was tagged.
  */
-#define STRING_DISTRIBUTION_DATE "2021-12-22"
+#define STRING_DISTRIBUTION_DATE "2022-02-07"
 
 
 /**
@@ -68,7 +68,7 @@
  * has a distinct Github fork— the Source Code URL should just be the main
  * Marlin repository.
  */
-#define SOURCE_CODE_URL "https://github.com/VyperCommunity/Marlin"
+#define SOURCE_CODE_URL "https://github.com/Pmatsol58/Marlin"
 
 /**
  * Default generic printer UUID.
@@ -79,7 +79,7 @@
  * The WEBSITE_URL is the location where users can get more information such as
  * documentation about a specific Marlin release.
  */
-#define WEBSITE_URL "github.com/as_yet_unknown"
+#define WEBSITE_URL "github.com/CR6Community"
 
 /**
  * Set the vendor info the serial USB interface, if changable
