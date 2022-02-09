@@ -27,7 +27,7 @@
   #include "../feature/ethernet.h"
 #endif
 
-uint8_t marlin_debug_flags = MARLIN_DEBUG_NONE;
+uint8_t marlin_debug_flags = MARLIN_DEBUG_NONE; //MARLIN_DEBUG_LEVELING | MARLIN_DEBUG_INFO | MARLIN_DEBUG_ECHO;
 
 // Commonly-used strings in serial output
 PGMSTR(NUL_STR,   "");   PGMSTR(SP_P_STR, " P");  PGMSTR(SP_T_STR, " T");
