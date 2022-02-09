@@ -38,7 +38,7 @@ void PIDHandler::Init() {
 
 
 void PIDHandler::HandleStartButton(DGUS_VP_Variable &var, void *val_ptr) {
-    static_assert(ADVANCED_PAUSE_PURGE_LENGTH == 0, "Assuming PURGE_LENGTH is 0 so we can use M701");
+    //static_assert(ADVANCED_PAUSE_PURGE_LENGTH == 0, "Assuming PURGE_LENGTH is 0 so we can use M701");
     // using temp we can tune PID for bed or hot end
     int8_t target = -1;  // default to BED
 
