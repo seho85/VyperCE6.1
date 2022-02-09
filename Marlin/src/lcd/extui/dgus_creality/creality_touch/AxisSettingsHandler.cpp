@@ -184,7 +184,6 @@ void AxisSettingsHandler::HandleBackNavigation(DGUS_VP_Variable &var, void *val_
         #if AXIS_IS_TMC(Z)
         case Z_AXIS:
             stepperZ.rms_current(tmc_current);
-            stepperZ2.rms_current(tmc_current);
 
             #if AXIS_HAS_STEALTHCHOP(Z)
                 stepperZ.set_stealthChop(stealthchop);
@@ -193,18 +192,21 @@ void AxisSettingsHandler::HandleBackNavigation(DGUS_VP_Variable &var, void *val_
                     stepperZ.set_pwm_thrs(hybrid_threshold);
                 #endif
             #endif
-            #if AXIS_HAS_STEALTHCHOP(Z2)
-                stepperZ2.set_stealthChop(stealthchop);
+            #if AXIS_IS_TMC(Z2)
+                stepperZ2.rms_current(tmc_current);
+                #if AXIS_HAS_STEALTHCHOP(Z2)
+                    stepperZ2.set_stealthChop(stealthchop);
 
-                #if ENABLED(HYBRID_THRESHOLD)
-                    stepperZ2.set_pwm_thrs(hybrid_threshold);
+                    #if ENABLED(HYBRID_THRESHOLD)
+                        stepperZ2.set_pwm_thrs(hybrid_threshold);
+                    #endif
                 #endif
             #endif
             break;
         #endif
 
         #if AXIS_IS_TMC(E0)
-            case E_AXIS:
+        case E_AXIS:
             stepperE0.rms_current(tmc_current);
 
             #if AXIS_HAS_STEALTHCHOP(E0)
