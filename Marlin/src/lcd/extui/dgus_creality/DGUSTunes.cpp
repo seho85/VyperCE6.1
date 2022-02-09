@@ -38,6 +38,7 @@
 #if ENABLED(DGUS_LCD_UI_CREALITY_TOUCH)
 
 #include "DGUSTunes.h"
+#include "DGUSScreenHandler.h"
 #include "../ui_api.h"
 
 //using namespace ExtUI;
@@ -45,6 +46,7 @@
   void PlayTune(uint8_t beeperPin, const uint16_t *tune, uint8_t speed=1) {
     uint8_t pos = 1;
     uint16_t wholenotelen = tune[0] / speed;
+    if (!DGUSScreenHandler::Settings.display_sound) return;
     do {
       uint16_t freq = tune[pos];
       uint16_t notelen = wholenotelen / tune[pos + 1];
