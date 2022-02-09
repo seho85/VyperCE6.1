@@ -33,11 +33,14 @@
 
 #define DISABLE_DEBUG
 
+// Avoid conflict with TIMER_SERVO when using the STM32 HAL
+#define TEMP_TIMER                          5
+
 //
 // EEPROM
 //
 #define FLASH_EEPROM_EMULATION
-#define MARLIN_EEPROM_SIZE              0x1000  // 4KB
+#define MARLIN_EEPROM_SIZE                  0x1000  // 4KB
 
 #if 0
 #if ENABLED(FLASH_EEPROM_EMULATION)
@@ -46,7 +49,7 @@
   #define EEPROM_PAGE_SIZE     (0x800U)           // 2KB, but will use 2x more (4KB)
   #define MARLIN_EEPROM_SIZE    EEPROM_PAGE_SIZE
 #else
-  #define MARLIN_EEPROM_SIZE              0x800U  // On SD, Limit to 2KB, require this amount of RAM
+  #define MARLIN_EEPROM_SIZE                0x800U  // On SD, Limit to 2KB, require this amount of RAM
 #endif
 #endif
 
@@ -109,6 +112,7 @@
 // Fans
 //
 #define FAN_PIN                             PA0  // FAN
+#define FAN0_PIN                            FAN_PIN  // FAN
 #define FAN1_PIN                            PA14 // Connected to +24V
 #define FAN2_PIN                            -1   // PB1, auto fan for E0
 #define CONTROLLER_FAN_PIN                  FAN1_PIN
@@ -118,17 +122,21 @@
 // Misc
 //
 #define LED_CONTROL_PIN                     PA13
-//#define BEEPER_PIN                          PB15
-#define TUNE_PIN                            PB15
-#define LED_PIN                             PA8
-//#define POWER_LOSS_PIN                      PA6
+//#define BEEPER_PIN                          PB15    // used for beeps using on board beeper
+#define TUNE_PIN                            PB15    // used for start up tunes using on board beeper
+//#define LED_PIN                             PA8
+//#define POWER_LOSS_PIN                      PA6     // logic level detection
 #define FIL_RUNOUT_PIN                      PA5
 #define CASE_LIGHT_PIN                      LED_CONTROL_PIN
-#define POWER_MONITOR_VOLTAGE_PIN           PA6
+#define POWER_MONITOR_VOLTAGE_PIN           PA6     // analog level detection
 #define MAIN_VOLTAGE_MEASURE_PIN            PA6
 #define AUTO_LEVEL_TX_PIN                   PB13
 #define AUTO_LEVEL_RX_PIN                   PB12
 #define PROBE_TARE_PIN                      AUTO_LEVEL_TX_PIN
+#define Z_MIN_PROBE_PIN                     AUTO_LEVEL_RX_PIN
+#define NEOPIXEL_PIN                        PB14    // neopixel LED driving pin
+#define PROBE_ACTIVATION_SWITCH_PIN         PB2
+
 //
 // SD Card
 //
