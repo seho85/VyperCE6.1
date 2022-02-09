@@ -1,14 +1,10 @@
-# Community firmware for the Creality CR-6 3D printer
-
-**This branch is for the Creality CR-6 SE with stock v4.5.2 motherboard and the stock display.**
-
-_For other configurations for the Creality CR-6 printer (like BigTreeTech SKR board and optional BTT TFT v3.0 display - please check the [branches and development section](#development-and-compile-it-yourself) section below._
+# Community firmware for touchscreen printers (like Anycubic Vyper or Creality CR-series)
 
 ## Downloads
 
 Please find official releases in the [Releases section](https://github.com/CR6Community/Marlin/releases). Take the release which belongs to the particular touch screen firmware you are going to flash. Please read the release notes *carefully* - it contains all the instructions you need.
 
-Ensure you take the right assets: the `firmware[suffix].bin`. You should not download the `Source code` archive if you are downloading with the purpose of directly flashing your printer.
+Ensure you take the right assets: the `[firmware/main-board]-[suffix].bin`. You should not download the `Source code` archive if you are downloading with the purpose of directly flashing the firmware onto your printer.
 
 *Support for the [BTT SKR board](https://damsteen.nl/blog/2020/11/25/how-to-btt-skr-cr6-installation) is available.*
 
@@ -20,6 +16,10 @@ There are several example configurations available for convenience. You can find
 
 Examples for the following hardware configurations are currently available:
 
+- Anycubic Vyper
+- Various contributed configurations (like Solcon, Ender 3 with touch screen, and CR-200b)
+
+**Creality CR-6:**
 - Creality stock TFT with:
    - Creality v4.5.2 motherboard (CR-6 SE)
    - Creality v4.5.3 motherboard (CR-6 SE and CR-6 MAX)
@@ -41,21 +41,27 @@ Original source code tracking:
 
 ## Purpose of this community firmware
 
-This fork of Marlin is meant for:
+Initially started with the goal of providing up to date and stable Marlin for the CR-6 SE native and [BTT SKR CR6](https://damsteen.nl/blog/2020/11/25/how-to-btt-skr-cr6-installation) motherboard - **this fork of Marlin is meant for:**
 
-- Providing up to date and stable Marlin for the CR-6 SE native and [BTT SKR CR6](https://damsteen.nl/blog/2020/11/25/how-to-btt-skr-cr6-installation) motherboard
-- [Expanding the features](https://github.com/CR6Community/CR-6-touchscreen) of the limited Creality CR-6 stock touch screen
+- Providing better firmware than the default firmwares provided by Anycubic, Creality and other manufacturers
+- [Expanding the features](https://github.com/CR6Community/CR-6-touchscreen) of the limited default touch screens delivered with 3d printers
 
 Once upstream Marlin supports the strain gauge, [currently being whipped into shape in this PR @Sebazzz has submitted](https://github.com/MarlinFirmware/Marlin/pull/19958), the future of this project will probably be:
 
 - Still expanding the features of the touch screen and merge upstream
 - Continuously update this fork to the latest Marlin stable versions
-- Provide builds for the CR-6 and SKR boards for the less technically inclined
+- Provide builds for some printers by default, for the less technically inclined
 
 ## Community firmware support & communities
 
 Get in touch with the developers! We [have our own Discord server](https://discord.gg/RKrxYy3Q9N).
 
+
+### Anycubic Community
+
+- [Facebook](https://www.facebook.com/groups/anycubicvyper)
+
+### Creality CR-6 communities
 The following CR-6 communities exist:
 
 - [Facebook independend CR-6 community](https://www.facebook.com/groups/cr6community)
@@ -66,7 +72,7 @@ Communities hosted by Creality:
 - [Official CR-6 user group](https://www.facebook.com/groups/CR6SECR6MAX)
 - [Official Creality user group](https://www.facebook.com/groups/creality3dofficial)
 
-Other communities:
+### Other communities:
 
 - [Reddit /r/3dprinting](https://www.reddit.com/r/3dprinting/)
 
@@ -90,7 +96,7 @@ For general Marlin support, please check:
 
 ## Credits
 
-The current core CR-6 Community firmware dev team consists of:
+The current core Community firmware dev team consists of:
 
  - Sebastiaan Dammann [[@Sebazzz](https://github.com/Sebazzz)] - Netherlands &nbsp; ([Donate](https://www.paypal.com/donate?hosted_button_id=YCH72S6WZQ5X4) ([Profile](https://www.paypal.com/paypalme/sebastiaandammann)) | [Website](https://damsteen.nl))
  - Juan Rodriguez [[@Nushio](https://github.com/Nushio)] - Mexico
@@ -102,6 +108,6 @@ We stand on the shoulders of giants. Don't forget to send your love [upstream to
 
 ## License
 
-Marlin and the Creality CR-6 Community Firmware is published under the [GPL license](/LICENSE) because we believe in open development. The GPL comes with both rights and obligations. Whether you use Marlin firmware as the driver for your open or closed-source product, you must keep Marlin open, and you must provide your compatible Marlin source code to end users upon request. The most straightforward way to comply with the Marlin license is to make a fork of Marlin on Github, perform your modifications, and direct users to your modified fork.
+Marlin and the Community Firmware is published under the [GPL license](/LICENSE) because we believe in open development. The GPL comes with both rights and obligations. Whether you use Marlin firmware as the driver for your open or closed-source product, you must keep Marlin open, and you must provide your compatible Marlin source code to end users upon request. The most straightforward way to comply with the Marlin license is to make a fork of Marlin on Github, perform your modifications, and direct users to your modified fork.
 
 While we can't prevent the use of this code in products (3D printers, CNC, etc.) that are closed source or crippled by a patent, we would prefer that you choose another firmware or, better yet, make your own.
