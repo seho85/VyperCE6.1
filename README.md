@@ -13,6 +13,7 @@ If you have the Platform.io plugin installed in Visual Studio code you can open 
 There are several configurations for the build of the source and they can be found at line 75 onwards of the configuration.h file:
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 // %%%% Options for building Vyper image %%%%
 
 // select build type here
@@ -43,7 +44,7 @@ There are also two options for homing of the Z axis;
 	the Z motors continue until the nozzle probe is triggered, i.e. bed is detected, and both Z motors stop,
 	the Z motors will raise the head slightly and then lower it again until the bed is again detected, this is the home position for Z.
 	
-There advantages and disadvantages to using the nozzle as Z home position, the mesh values will be closer to 0 and thus will show less red or blue but homing will not complete without a working sensor. Also the Z 'flags' used to trigger the Z axis sensors need to be lower than the nozzle, this is the case with fixed flags but the adjustable ones MUST be set to protrude as far below as possible else the nozzle will impact the bed.
+There are advantages and disadvantages to using the nozzle as Z home position, the mesh values will be closer to 0 and thus will show less red or blue but homing will not complete without a working sensor. Also the Z 'flags' used to trigger the Z axis sensors need to be lower than the nozzle, this is the case with fixed flags but the adjustable ones MUST be set to protrude as far below as possible else the nozzle will impact the bed.
 
 
 ## Purpose of this community firmware
@@ -64,7 +65,7 @@ Once upstream Marlin supports the strain gauge, [currently being whipped into sh
 Get in touch with the developers! We [have our own Discord server](https://discord.gg/RKrxYy3Q9N).
 
 
-### Anycubic Community
+### Anycubic Vyper Community
 
 - [Facebook](https://www.facebook.com/groups/anycubicvyper)
 
