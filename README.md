@@ -2,48 +2,54 @@
 
 ## Downloads
 
-Please find official releases in the [Releases section](https://github.com/CR6Community/Marlin/releases). Take the release which belongs to the particular touch screen firmware you are going to flash. Please read the release notes *carefully* - it contains all the instructions you need.
+At present there are no binary downloads since the STM license conditions for some of the libraries used restrict execution to STM devices only, the Vyper mainboard uses a non-STM device. 
+You may take this source and build for your board but it is your responsibility to ensure it is running in accordance with the license conditions.
 
-Ensure you take the right assets: the `[firmware/main-board]-[suffix].bin`. You should not download the `Source code` archive if you are downloading with the purpose of directly flashing the firmware onto your printer.
-
-*Support for the [BTT SKR board](https://damsteen.nl/blog/2020/11/25/how-to-btt-skr-cr6-installation) is available.*
-
-*At least one CF Release 6 user has confirmed that the v4.5.3 firmware configuration also supports the Creality v1.1.03 (ERA) board.*
 
 ### Development and compile-it-yourself
 
-There are several example configurations available for convenience. You can find them in the [`config`](./config) directory. Copy the files from the rioght directory to the root of the repository and you can directly build them if you have the Platform.io plugin installed in Visual Studio code. You will need to set the Platform.io environment to the environment in the file `platformio-environment.txt`.
+If you have the Platform.io plugin installed in Visual Studio code you can open the folder to start with the code.
 
-Examples for the following hardware configurations are currently available:
+There are several configurations for the build of the source and they can be found at line 75 onwards of the configuration.h file:
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// %%%% Options for building Vyper image %%%%
 
-- Anycubic Vyper
-- Various contributed configurations (like Solcon, Ender 3 with touch screen, and CR-200b)
+// select build type here
+//#define VYPER_BUILD         // standard
+#define VYPER_BUILD_LA      // with linear advance and junction deviation enabled
+//#define VYPER_BUILD_LA_T    // as above but with uart connection to TMC2209's for x, y, z and z2
+//#define VYPER_BUILD_LA_TE   // as above but with software serial connection to e stepper
 
-**Creality CR-6:**
-- Creality stock TFT with:
-   - Creality v4.5.2 motherboard (CR-6 SE)
-   - Creality v4.5.3 motherboard (CR-6 SE and CR-6 MAX)
-   - BigTreeTech SKR CR-6 (CR-6 SE)
-- BigTreeTech SKR CR-6 with BigTreeTech TFT v3.0
+// Leave undefined to home Z using two Z sensors (stock configuration)
+//#define VYPER_NOZZLE_HOMING // home Z using nozzle sensor at middle of bed
 
-Legacy branches:
+// NOTE to use nozzle sensor any adjustable Z sensors must be set to maximum
+// extended length so sensor is detected before nozzle reaches bed
 
-- **[`creality-cr6-merge-attempt`](https://github.com/CR6Community/Marlin/tree/creality-cr6-merge-attempt)** - initial branch based on Creality v1.0.3.7 firmware source code release and upgraded until the community firmware 3 release. All new releases are released from the `extui` branch.
+Most users will probably want to use the VYPER_BUILD_LA option since this runs on the stock main board and gives the extra linear advance and junction deviation options for better prints (once calibrated).
 
-Original source code tracking:
+The _T and _TE options are for use with a modified main board where the main board has been user modified to add uart connections to the TMC2209 drivers.
 
-- **[`cr6-creality-changes`](https://github.com/CR6Community/Marlin/tree/cr6-creality-changes)** - tracks the changes from the Creality source code dump against Marlin upstream. As of now we have the Creality v1.0.3.7 firmware on this branch, based on Marlin pre-2.0.
+There are also two options for homing of the Z axis;
+1. The standard way as used by Anycubic which uses the two Z axis photo sensors, one on each side, to determine the home position of each of the Z axes. 
+	The home sequence is lift Z to avoid anything on the bed, 
+	move head on X gantry until the X limit switch is triggered and stop, 
+	move bed towards back of printer until the Y limit switch is triggered and stop, 
+	the z motors lower the axis until the sensor associated with each motor is triggered to stop that motor, so each motor is independant, e.g. left motor triggers left sensor and stops, right motor continues until right sensor triggers and stops.
+2. The alternative way which uses the nozzle probe sensor to determine the home position of the Z axes at the centre of the bed. 
+	The home sequence here is the same as for the standard way above except after the Y limit is triggered the head is moved to the centre of the bed,
+	the Z motors then lower the head until the left Z sensor is triggered,
+	the Z motors continue until the nozzle probe is triggered, i.e. bed is detected, and both Z motors stop,
+	the Z motors will raise the head slightly and then lower it again until the bed is again detected, this is the home position for Z.
+	
+There advantages and disadvantages to using the nozzle as Z home position, the mesh values will be closer to 0 and thus will show less red or blue but homing will not complete without a working sensor. Also the Z 'flags' used to trigger the Z axis sensors need to be lower than the nozzle, this is the case with fixed flags but the adjustable ones MUST be set to protrude as far below as possible else the nozzle will impact the bed.
 
-    - **[`v1.0.3.7`](https://github.com/CR6Community/Marlin/tree/official-fw/v1.0.3.7)**
-    - **[`v1.0.4.1`](https://github.com/CR6Community/Marlin/tree/official-fw/v1.0.4.1)**
-
-- **[`cr6-btt-dump`](https://github.com/CR6Community/Marlin/tree/cr6-btt-dump) - tracks the changes from the [Big Tree Tech SKR board firmware](https://github.com/bigtreetech/BIGTREETECH-SKR-CR6/tree/master/firmware/BTT-SKR-CR6)** source code (which does not have any git history). It appears the for the moment BTT source code is based on the Creality v1.0.3.7 source code release.
 
 ## Purpose of this community firmware
 
-Initially started with the goal of providing up to date and stable Marlin for the CR-6 SE native and [BTT SKR CR6](https://damsteen.nl/blog/2020/11/25/how-to-btt-skr-cr6-installation) motherboard - **this fork of Marlin is meant for:**
+Initially started with the goal of providing an alternative firmware for the Anycubic Vyper motherboard
 
-- Providing better firmware than the default firmwares provided by Anycubic, Creality and other manufacturers
+- Providing better firmware than the default firmwares provided by Anycubic
 - [Expanding the features](https://github.com/CR6Community/CR-6-touchscreen) of the limited default touch screens delivered with 3d printers
 
 Once upstream Marlin supports the strain gauge, [currently being whipped into shape in this PR @Sebazzz has submitted](https://github.com/MarlinFirmware/Marlin/pull/19958), the future of this project will probably be:
