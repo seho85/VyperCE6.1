@@ -12,8 +12,7 @@ If you have the Platform.io plugin installed in Visual Studio code you can open 
 
 There are several configurations for the build of the source and they can be found at line 75 onwards of the configuration.h file:
 
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+```
 // %%%% Options for building Vyper image %%%%
 
 // select build type here
@@ -27,7 +26,7 @@ There are several configurations for the build of the source and they can be fou
 
 // NOTE to use nozzle sensor any adjustable Z sensors must be set to maximum
 // extended length so sensor is detected before nozzle reaches bed
-
+```
 Most users will probably want to use the VYPER_BUILD_LA option since this runs on the stock main board and gives the extra linear advance and junction deviation options for better prints (once calibrated).
 
 The _T and _TE options are for use with a modified main board where the main board has been user modified to add uart connections to the TMC2209 drivers.
