@@ -59,7 +59,7 @@ constexpr temp_entry_t temptable_1[] PROGMEM = {
   { OV( 348), 135 },
   { OV( 379), 130 },
   { OV( 411), 125 },
-  #if MB(AC_TRI_F1_V1) // Custom Vyper thermistor table - TODO: clean this up
+  #if MB(TRIGORILLA_V006) // Custom Vyper thermistor table - TODO: clean this up
   { OV( 495), 120 },
   { OV( 530), 115 },
   { OV( 566), 110 },
