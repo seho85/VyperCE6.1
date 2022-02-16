@@ -41,7 +41,9 @@
   #ifndef HAL_STM32
     #define HAL_STM32
   #endif
-  #define HAL_PATH(PATH, NAME) XSTR(PATH/STM32/NAME)
+  //#define HAL_PATH(PATH, NAME) XSTR(PATH/STM32/NAME)
+  ///XXX: Dirty hack: Make better a new platform
+  #define HAL_PATH(PATH, NAME) XSTR(PATH/GD32/NAME)
 #elif defined(ARDUINO_ARCH_ESP32)
   #define HAL_PATH(PATH, NAME) XSTR(PATH/ESP32/NAME)
 #elif defined(__PLAT_LINUX__)
